@@ -73,7 +73,7 @@ func (scd4x *SCD4X) ReadCommand(command *Command) ([]byte, error) {
 	if command.delay > 0 {
 		time.Sleep(command.delay)
 	}
-	return c, nil
+	return r, nil
 }
 
 func (scd4x *SCD4X) WriteCommand(command *Command) error {
@@ -122,7 +122,7 @@ func (scd4x *SCD4X) ReadCommandValue(command *Command, value uint16) ([]byte, er
 	if command.delay > 0 {
 		time.Sleep(command.delay)
 	}
-	return c, nil
+	return r, nil
 }
 
 func (scd4x *SCD4X) dataReady() bool {
