@@ -49,11 +49,7 @@ var (
 )
 
 type SCD4X struct {
-	device    *i2c.Dev
-	buffer    [18]byte
-	cmd       [2]byte
-	crcBuffer [2]byte
-
+	device           *i2c.Dev
 	Temperature      float64
 	RelativeHumidity float64
 	CO2              uint16
@@ -84,7 +80,7 @@ func (scd4x *SCD4X) WriteCommand(command *Command) error {
 	encodedCommand := make([]byte, 2)
 	binary.BigEndian.PutUint16(encodedCommand, command.code)
 	if _, err := scd4x.device.Write(encodedCommand); err != nil {
-		return fmt.Errorf("Error while running %s: %v", command.description, err)
+		return fmt.Errorf("error while running %s: %v", command.description, err)
 	}
 
 	if command.delay > 0 {
@@ -100,7 +96,7 @@ func (scd4x *SCD4X) WriteCommandValue(command *Command, value uint16) error {
 	encodedCommand[3] = byte(value & 0xFF)
 	encodedCommand[4] = scd4x.crc8(encodedCommand[2:4])
 	if _, err := scd4x.device.Write(encodedCommand); err != nil {
-		return fmt.Errorf("Error while running %s: %v", command.description, err)
+		return fmt.Errorf("error while running %s: %v", command.description, err)
 	}
 
 	if command.delay > 0 {
@@ -235,9 +231,12 @@ func (scd4x *SCD4X) ForceCalibration(targetCO2 uint16) error {
 		return err
 	}
 	var unpackedData uint16
-	err = binary.Read(bytes.NewReader(response[0:2]), binary.BigEndian, &unpackedData)
+	if err = binary.Read(bytes.NewReader(response[0:2]), binary.BigEndian, &unpackedData); err != nil {
+		return err
+	}
+
 	if unpackedData == 0xFFFF {
-		return fmt.Errorf("Force recalibration failed, please make sure sensor is active for 3m first")
+		return fmt.Errorf("force recalibration failed, please make sure sensor is active for 3m first")
 	}
 	return nil
 }
@@ -249,7 +248,7 @@ func (scd4x *SCD4X) Test() error {
 		return err
 	}
 	if response[0] != 0 || response[1] != 0 {
-		return fmt.Errorf("Self test failed")
+		return fmt.Errorf("self test failed")
 	}
 	return nil
 }
@@ -278,9 +277,6 @@ func (scd4x *SCD4X) PersistSettings() {
 }
 
 func (scd4x *SCD4X) SetAmbientPressure(ambientPressure uint16) error {
-	if ambientPressure < 0 || ambientPressure > 65535 {
-		return fmt.Errorf("Ambient pressure must be from 0~65535 hPascals")
-	}
 	return scd4x.WriteCommandValue(&SCD4X_SETPRESSURE, ambientPressure)
 }
 
@@ -304,7 +300,7 @@ func (scd4x *SCD4X) GetTempetatureOffset() (float64, error) {
 
 func (scd4x *SCD4X) SetTemperatureOffset(value uint16) error {
 	if value > 374 {
-		return fmt.Errorf("Offset value must be less than or equal to 374 degrees Celsius")
+		return fmt.Errorf("offset value must be less than or equal to 374 degrees Celsius")
 	}
 	temp := value * uint16(math.Pow(2, 16)) / 175
 	return scd4x.WriteCommandValue(&SCD4X_SETTEMPOFFSET, temp)
@@ -321,7 +317,7 @@ on readings.
 */
 func (scd4x *SCD4X) GetAltitude() (uint16, error) {
 	response, err := scd4x.ReadCommand(&SCD4X_GETALTITUDE)
-	if (err != nil) {
+	if err != nil {
 		return 0, err
 	}
 
@@ -329,8 +325,5 @@ func (scd4x *SCD4X) GetAltitude() (uint16, error) {
 }
 
 func (scd4x *SCD4X) SetAltitude(altitude uint16) error {
-	if altitude > 65535 {
-		return fmt.Errorf("Height must be less than or equal to 65535 meters")
-	}
 	return scd4x.WriteCommandValue(&SCD4X_SETALTITUDE, altitude)
 }
