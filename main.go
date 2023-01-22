@@ -54,7 +54,7 @@ func main() {
 	defer b.Close()
 
 	// Dev is a valid conn.Conn.
-	d := &i2c.Dev{Addr: 62, Bus: b}
+	d := &i2c.Dev{Addr: 0x62, Bus: b}
 	co2Sensor := NewSCD4X(d)
 	co2Sensor.StartPeriodicMeasurement()
 
