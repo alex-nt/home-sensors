@@ -138,7 +138,7 @@ func (scd4x *SCD4X) readData() error {
 	response, err := scd4x.ReadCommand(&SCD4X_READMEASUREMENT)
 	scd4x.CO2 = binary.BigEndian.Uint16(response[0:2])
 	scd4x.Temperature = (-45 + 175*(float64(binary.BigEndian.Uint16(response[3:5]))/math.Pow(2, 16)))
-	scd4x.RelativeHumidity = 100 * (float64(binary.BigEndian.Uint16(response[6:7])) / math.Pow(2, 16))
+	scd4x.RelativeHumidity = 100 * (float64(binary.BigEndian.Uint16(response[6:8])) / math.Pow(2, 16))
 	return err
 }
 
