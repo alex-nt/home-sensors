@@ -186,9 +186,10 @@ func (scd4x *SCD4X) crc8(buffer []byte) byte {
 	for _, v := range buffer {
 		crc ^= v
 		for i := 0; i < 8; i++ {
-			crc = crc << 1
 			if crc&0x80 != 0 {
-				crc = crc ^ 0x31
+				crc = (crc << 1) ^ 0x31
+			} else {
+				crc = crc << 1
 			}
 		}
 	}
