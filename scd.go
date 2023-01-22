@@ -192,7 +192,7 @@ func (scd4x *SCD4X) crc8(buffer []byte) byte {
 			}
 		}
 	}
-	return crc & 0xFF
+	return crc
 }
 
 func (scd4x *SCD4X) checkBufferCRC(buffer []byte) error {
