@@ -31,7 +31,7 @@ var (
 	SCD4XX_REINIT                          = Command{code: 0x3646, description: "Reinit", delay: time.Duration(0.02 * float64(time.Second)), size: 3}
 	SCD4X_FACTORYRESET                     = Command{code: 0x3632, description: "Factory reset", delay: time.Duration(1.2 * float64(time.Second)), size: 0}
 	SCD4X_FORCEDRECAL                      = Command{code: 0x362F, description: "Force recal", delay: time.Duration(0.5 * float64(time.Second)), size: 3}
-	SCD4X_SELFTEST                         = Command{code: 0x3639, description: "Self test", delay: time.Duration(10 * float64(time.Second)), size: 0}
+	SCD4X_SELFTEST                         = Command{code: 0x3639, description: "Self test", delay: time.Duration(10 * float64(time.Second)), size: 3}
 	SCD4X_DATAREADY                        = Command{code: 0xE4B8, description: "Data Ready", delay: time.Duration(0.001 * float64(time.Second)), size: 3}
 	SCD4X_STOPPERIODICMEASUREMENT          = Command{code: 0x3F86, description: "Stop periodic measurement", delay: time.Duration(0.5 * float64(time.Second)), size: 0}
 	SCD4X_STARTPERIODICMEASUREMENT         = Command{code: 0x21B1, description: "Start periodic measurement", delay: time.Duration(0 * float64(time.Second)), size: 0}
@@ -187,7 +187,7 @@ func (scd4x *SCD4X) crc8(buffer []byte) byte {
 		crc ^= v
 		for i := 0; i < 8; i++ {
 			crc = crc << 1
-			if crc&0x80 == 1 {
+			if crc&0x80 != 0 {
 				crc = crc ^ 0x31
 			}
 		}
