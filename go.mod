@@ -1,4 +1,4 @@
-module example.com/go-hello
+module azuremyst.org/go-home-sensors
 
 go 1.16
 
