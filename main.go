@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -15,19 +14,29 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func recordMetrics() {
+func recordMetrics(scd4x *SCD4X) {
 	go func() {
 		for {
-			opsProcessed.Inc()
-			time.Sleep(2 * time.Second)
+			temperatureGauge.Set(scd4x.GetTemperature())
+			humidityGauge.Set(scd4x.GetRelativeHumidity())
+			co2Gauge.Set(float64(scd4x.GetCO2()))
+			time.Sleep(5 * time.Second)
 		}
 	}()
 }
 
 var (
-	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "myapp_processed_ops_total",
-		Help: "The total number of processed events",
+	temperatureGauge = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "room_temperature",
+		Help: "Ambient temperature in C",
+	})
+	humidityGauge = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "room_humidity",
+		Help: "Ambient relative humidity",
+	})
+	co2Gauge = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "room_co2",
+		Help: "CO2 in ppm",
 	})
 )
 
@@ -46,17 +55,10 @@ func main() {
 
 	// Dev is a valid conn.Conn.
 	d := &i2c.Dev{Addr: 62, Bus: b}
-	co2Sensor = NewSCD4X(d)
+	co2Sensor := NewSCD4X(d)
+	co2Sensor.StartPeriodicMeasurement()
 
-	// Send a command 0x10 and expect a 5 bytes reply.
-	write := []byte{0x10}
-	read := make([]byte, 5)
-	if err := d.Tx(write, read); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("%v\n", read)
-
-	recordMetrics()
+	recordMetrics(&co2Sensor)
 
 	http.Handle("/metrics", promhttp.Handler())
 	http.ListenAndServe(":2112", nil)
