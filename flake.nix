@@ -27,7 +27,7 @@
       apps = forAllSystems (system: {
         default = {
           type = "app";
-          program = "${self.packages.${system}.default}/bin/go-hello";
+          program = "${self.packages.${system}.default}/bin/go-home-sensors";
         };
       });
       devShells = forAllSystems (system:
@@ -44,7 +44,7 @@
         in
         {
           default = pkgs.buildGoModule {
-            pname = "go-hello";
+            pname = "go-home-sensors";
             inherit version;
             # In 'nix develop', we don't need a copy of the source tree
             # in the Nix store.
@@ -60,13 +60,13 @@
             # remeber to bump this hash when your dependencies change.
             #vendorSha256 = pkgs.lib.fakeSha256;
 
-            vendorSha256 = "sha256-pQpattmS9VmO3ZIQUFn66az8GSmB4IvYhTTCFn6SUmo=";
+            vendorSha256 = "sha256-iwOitoA+9cVJGFkBWMKChgEczpXiXAhlEpnao1Jl97I=";
           };
         });
 
       # The default package for 'nix build'. This makes sense if the
       # flake provides only one package or there is a clear "main"
       # package.
-      defaultPackage = forAllSystems (system: self.packages.${system}.go-hello);
+      defaultPackage = forAllSystems (system: self.packages.${system}.go-home-sensors);
     };
 }
