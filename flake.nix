@@ -78,7 +78,7 @@
                 wantedBy = [ "multi-user.target" ];
 
                 serviceConfig = 
-                  let pkg = self.packages.${system}.default;
+                  let pkg = self.packages.${builtins.currentSystem}.default;
                   in {
                     Restart = "on-failure";
                     ExecStart = "${pkg}/bin/go-home-sensors";
