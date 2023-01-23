@@ -74,7 +74,7 @@
             };
 
             config = mkIf cfg.enable {
-              systemd.services.alex-nt.home-sensors = {
+              systemd.services.alexnt-home-sensors = {
                 wantedBy = [ "multi-user.target" ];
 
                 serviceConfig = 
