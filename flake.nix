@@ -64,6 +64,29 @@
           };
         });
 
+      nixosModules = {
+        home-sensors = { config, lib, ... }:
+          with lib;
+          let cfg = config.alex-nt.services.home-sensors;
+          in {
+            options.alex-nt.services.home-sensors = {
+              enable = mkEnableOption "Enables the home-sensors prometheus-collector service";
+            };
+
+            config = mkIf cfg.enable {
+              systemd.services.alex-nt.home-sensors = {
+                wantedBy = [ "multi-user.target" ];
+
+                serviceConfig = {
+                  Restart = "on-failure";
+                  ExecStart = "${self.packages."${system}".default}/bin/go-home-sensors";
+                  DynamicUser = "yes";
+                };
+              };
+            };
+          };
+      };
+
       # The default package for 'nix build'. This makes sense if the
       # flake provides only one package or there is a clear "main"
       # package.
