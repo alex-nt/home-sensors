@@ -60,7 +60,7 @@ var (
 		Help: "Air quality PM25 Standard",
 	})
 	pm100StandardGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "room_air_quality_pm10_standard",
+		Name: "room_air_quality_pm100_standard",
 		Help: "Air quality PM10 Standard",
 	})
 	pm10EnvGauge = promauto.NewGauge(prometheus.GaugeOpts{
@@ -68,7 +68,7 @@ var (
 		Help: "Air quality PM10 Environmental",
 	})
 	pm25EnvGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "room_air_quality_pm10_env",
+		Name: "room_air_quality_pm25_env",
 		Help: "Air quality PM25 Environmental",
 	})
 	pm100EnvGauge = promauto.NewGauge(prometheus.GaugeOpts{
