@@ -77,11 +77,13 @@
               systemd.services.alex-nt.home-sensors = {
                 wantedBy = [ "multi-user.target" ];
 
-                serviceConfig = {
-                  Restart = "on-failure";
-                  ExecStart = "${self.packages."${system}".default}/bin/go-home-sensors";
-                  DynamicUser = "yes";
-                };
+                serviceConfig = 
+                  let pkg = self.packages.${system}.default;
+                  in {
+                    Restart = "on-failure";
+                    ExecStart = "${pkg}/bin/go-home-sensors";
+                    DynamicUser = "yes";
+                  };
               };
             };
           };
