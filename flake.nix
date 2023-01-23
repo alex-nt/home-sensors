@@ -1,5 +1,5 @@
 {
-  description = "A simple Go package";
+  description = "Env sensor prometheus collector";
 
   # Nixpkgs / NixOS version to use.
   inputs.nixpkgs.url = "nixpkgs/nixos-22.11";
