@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"log"
 	"math"
-	"os"
 	"sync"
 	"time"
 
@@ -14,13 +12,8 @@ import (
 )
 
 var (
-	ErrorLog *log.Logger
-	mu       sync.Mutex
+	mu sync.Mutex
 )
-
-func init() {
-	ErrorLog = log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
-}
 
 type Command struct {
 	code        uint16
