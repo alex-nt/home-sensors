@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"sync"
 	"time"
 
 	"periph.io/x/conn/v3/i2c"
@@ -14,6 +15,7 @@ import (
 
 var (
 	ErrorLog *log.Logger
+	mu       sync.Mutex
 )
 
 func init() {
@@ -60,6 +62,9 @@ func NewSCD4X(device *i2c.Dev) SCD4X {
 }
 
 func (scd4x *SCD4X) ReadCommand(command *Command) ([]byte, error) {
+	mu.Lock()
+	defer mu.Unlock()
+
 	c := make([]byte, 2)
 	r := make([]byte, command.size)
 	binary.BigEndian.PutUint16(c, command.code)
@@ -77,6 +82,9 @@ func (scd4x *SCD4X) ReadCommand(command *Command) ([]byte, error) {
 }
 
 func (scd4x *SCD4X) WriteCommand(command *Command) error {
+	mu.Lock()
+	defer mu.Unlock()
+
 	encodedCommand := make([]byte, 2)
 	binary.BigEndian.PutUint16(encodedCommand, command.code)
 	if _, err := scd4x.device.Write(encodedCommand); err != nil {
@@ -90,6 +98,9 @@ func (scd4x *SCD4X) WriteCommand(command *Command) error {
 }
 
 func (scd4x *SCD4X) WriteCommandValue(command *Command, value uint16) error {
+	mu.Lock()
+	defer mu.Unlock()
+
 	encodedCommand := make([]byte, 5)
 	binary.BigEndian.PutUint16(encodedCommand, command.code)
 	encodedCommand[2] = byte((value >> 8) & 0xFF)
@@ -106,6 +117,9 @@ func (scd4x *SCD4X) WriteCommandValue(command *Command, value uint16) error {
 }
 
 func (scd4x *SCD4X) ReadCommandValue(command *Command, value uint16) ([]byte, error) {
+	mu.Lock()
+	defer mu.Unlock()
+
 	c := make([]byte, 5)
 	r := make([]byte, command.size)
 	binary.BigEndian.PutUint16(c, command.code)
