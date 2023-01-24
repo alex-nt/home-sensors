@@ -52,62 +52,62 @@ func recordMetrics(scd4x *SCD4X, pmsA0003i *PMSA0003I) {
 
 var (
 	pm10StandardGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "room_air_quality_standard",
+		Name: "room_air_quality_standard_pm10",
 		Help: "Air quality PM10 Standard",
 		ConstLabels: map[string]string{"diameter": "10pm"},
 	})
 	pm25StandardGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "room_air_quality_standard",
+		Name: "room_air_quality_standard_pm25",
 		Help: "Air quality PM25 Standard",
 		ConstLabels: map[string]string{"diameter": "25pm"},
 	})
 	pm100StandardGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "room_air_quality_standard",
+		Name: "room_air_quality_standard_pm100",
 		Help: "Air quality PM100 Standard",
 		ConstLabels: map[string]string{"diameter": "100pm"},
 	})
 	pm10EnvGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "room_air_quality_env",
+		Name: "room_air_quality_env_pm10",
 		Help: "Air quality PM10 Environmental",
 		ConstLabels: map[string]string{"diameter": "10pm"},
 	})
 	pm25EnvGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "room_air_quality_env",
+		Name: "room_air_quality_env_pm25",
 		Help: "Air quality PM25 Environmental",
 		ConstLabels: map[string]string{"diameter": "25pm"},
 	})
 	pm100EnvGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "room_air_quality_env",
+		Name: "room_air_quality_env_pm100",
 		Help: "Air quality PM100 Environmental",
 		ConstLabels: map[string]string{"diameter": "100pm"},
 	})
 	particles03umGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "room_air_quality_particles",
+		Name: "room_air_quality_particles_03um",
 		Help: "Air quality Particles 03um",
 		ConstLabels: map[string]string{"size": "03um"},
 	})
 	particles05umGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "room_air_quality_particles",
+		Name: "room_air_quality_particles_05um",
 		Help: "Air quality Particles 05um",
 		ConstLabels: map[string]string{"size": "05um"},
 	})
 	particles10umGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "room_air_quality_particles",
+		Name: "room_air_quality_particles_10um",
 		Help: "Air quality Particles 10um",
 		ConstLabels: map[string]string{"size": "10um"},
 	})
 	particles25umGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "room_air_quality_particles",
+		Name: "room_air_quality_particles_25um",
 		Help: "Air quality Particles 25um",
 		ConstLabels: map[string]string{"size": "25pm"},
 	})
 	particles50umGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "room_air_quality_particles",
+		Name: "room_air_quality_particles_50um",
 		Help: "Air quality Particles 50um",
 		ConstLabels: map[string]string{"size": "50um"},
 	})
 	particles100umGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name: "room_air_quality_particles",
+		Name: "room_air_quality_particles_100um",
 		Help: "Air quality Particles 100um",
 		ConstLabels: map[string]string{"size": "100um"},
 	})
