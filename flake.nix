@@ -65,7 +65,7 @@
         });
 
       nixosModules = {
-        home-sensors = { config, lib, ... }:
+        home-sensors = { config, lib, pkgs, ... }:
           with lib;
           let cfg = config.alex-nt.services.home-sensors;
           in {
@@ -77,8 +77,8 @@
               systemd.services.alexnt-home-sensors = {
                 wantedBy = [ "multi-user.target" ];
 
-                serviceConfig = 
-                  let pkg = self.packages.${builtins.currentSystem}.default;
+                serviceConfig =
+                  let pkg = self.packages.${pkgs.system}.default;
                   in {
                     Restart = "on-failure";
                     ExecStart = "${pkg}/bin/go-home-sensors";
