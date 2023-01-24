@@ -83,6 +83,7 @@
                     Restart = "on-failure";
                     ExecStart = "${pkg}/bin/go-home-sensors";
                     DynamicUser = "yes";
+                    SupplementaryGroups = [ "i2c" ];
                   };
               };
             };
