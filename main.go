@@ -16,6 +16,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+const (
+	Label_Sensor        = "sensor"
+	Label_Particle_Size = "particleSize"
+)
+
 var (
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
@@ -29,104 +34,58 @@ func init() {
 func recordMetrics(scd4x *SCD4X, PMSA003I *PMSA003I) {
 	go func() {
 		for {
-			temperatureGauge.Set(scd4x.GetTemperature())
-			humidityGauge.Set(scd4x.GetRelativeHumidity())
-			co2Gauge.Set(float64(scd4x.GetCO2()))
+			temperatureGauge.WithLabelValues("scd41").Set(scd4x.GetTemperature())
+			humidityGauge.WithLabelValues("scd41").Set(scd4x.GetRelativeHumidity())
+			co2Gauge.WithLabelValues("scd41").Set(float64(scd4x.GetCO2()))
 
 			PMSA003I.Read()
-			pm10StandardGauge.Set(float64(PMSA003I.PM10Standard))
-			pm25StandardGauge.Set(float64(PMSA003I.PM25Standard))
-			pm100StandardGauge.Set(float64(PMSA003I.PM100Standard))
-			pm10EnvGauge.Set(float64(PMSA003I.PM10Env))
-			pm25EnvGauge.Set(float64(PMSA003I.PM25Env))
-			pm100EnvGauge.Set(float64(PMSA003I.PM100Env))
-			particles03umGauge.Set(float64(PMSA003I.Particles03um))
-			particles05umGauge.Set(float64(PMSA003I.Particles05um))
-			particles10umGauge.Set(float64(PMSA003I.Particles10um))
-			particles25umGauge.Set(float64(PMSA003I.Particles25um))
-			particles50umGauge.Set(float64(PMSA003I.Particles50um))
-			particles100umGauge.Set(float64(PMSA003I.Particles100um))
-			time.Sleep(5 * time.Second)
+			pmStandardGauge.WithLabelValues("pmsa003i", "10pm").Set(float64(PMSA003I.PM10Standard))
+			pmStandardGauge.WithLabelValues("pmsa003i", "25pm").Set(float64(PMSA003I.PM25Standard))
+			pmStandardGauge.WithLabelValues("pmsa003i", "100pm").Set(float64(PMSA003I.PM100Standard))
+
+			pmEnvGauge.WithLabelValues("pmsa003i", "10pm").Set(float64(PMSA003I.PM10Env))
+			pmEnvGauge.WithLabelValues("pmsa003i", "25pm").Set(float64(PMSA003I.PM25Env))
+			pmEnvGauge.WithLabelValues("pmsa003i", "100pm").Set(float64(PMSA003I.PM100Env))
+
+			particlesCountGauge.WithLabelValues("pmsa003i", "03um").Set(float64(PMSA003I.Particles03um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "05pm").Set(float64(PMSA003I.Particles05um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "10pm").Set(float64(PMSA003I.Particles10um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "25pm").Set(float64(PMSA003I.Particles25um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "50pm").Set(float64(PMSA003I.Particles50um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "100pm").Set(float64(PMSA003I.Particles100um))
+			time.Sleep(15 * time.Second)
 		}
 	}()
 }
 
 var (
-	pm10StandardGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name:        "room_air_quality_standard_pm10",
-		Help:        "Air quality PM10 Standard",
-		ConstLabels: map[string]string{"diameter": "10pm"},
-	})
-	pm25StandardGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name:        "room_air_quality_standard_pm25",
-		Help:        "Air quality PM25 Standard",
-		ConstLabels: map[string]string{"diameter": "25pm"},
-	})
-	pm100StandardGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name:        "room_air_quality_standard_pm100",
-		Help:        "Air quality PM100 Standard",
-		ConstLabels: map[string]string{"diameter": "100pm"},
-	})
-	pm10EnvGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name:        "room_air_quality_env_pm10",
-		Help:        "Air quality PM10 Environmental",
-		ConstLabels: map[string]string{"diameter": "10pm"},
-	})
-	pm25EnvGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name:        "room_air_quality_env_pm25",
-		Help:        "Air quality PM25 Environmental",
-		ConstLabels: map[string]string{"diameter": "25pm"},
-	})
-	pm100EnvGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name:        "room_air_quality_env_pm100",
-		Help:        "Air quality PM100 Environmental",
-		ConstLabels: map[string]string{"diameter": "100pm"},
-	})
-	particles03umGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name:        "room_air_quality_particles_03um",
-		Help:        "Air quality Particles 03um",
-		ConstLabels: map[string]string{"size": "03um"},
-	})
-	particles05umGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name:        "room_air_quality_particles_05um",
-		Help:        "Air quality Particles 05um",
-		ConstLabels: map[string]string{"size": "05um"},
-	})
-	particles10umGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name:        "room_air_quality_particles_10um",
-		Help:        "Air quality Particles 10um",
-		ConstLabels: map[string]string{"size": "10um"},
-	})
-	particles25umGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name:        "room_air_quality_particles_25um",
-		Help:        "Air quality Particles 25um",
-		ConstLabels: map[string]string{"size": "25pm"},
-	})
-	particles50umGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name:        "room_air_quality_particles_50um",
-		Help:        "Air quality Particles 50um",
-		ConstLabels: map[string]string{"size": "50um"},
-	})
-	particles100umGauge = promauto.NewGauge(prometheus.GaugeOpts{
-		Name:        "room_air_quality_particles_100um",
-		Help:        "Air quality Particles 100um",
-		ConstLabels: map[string]string{"size": "100um"},
-	})
+	pmStandardGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "room_air_quality_pm_concentration_standard",
+		Help: "Air quality. PM concentration in standard units",
+	}, []string{Label_Sensor, Label_Particle_Size})
+	pmEnvGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "room_air_quality_pm_concentration_env",
+		Help: "Air quality. PM concentration in environmental units",
+	}, []string{Label_Sensor, Label_Particle_Size})
+	particlesCountGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "room_air_quality_particles_count",
+		Help: "Air quality. Particulate matter per 0.1L air.",
+	}, []string{Label_Sensor, Label_Particle_Size})
 )
 
 var (
-	temperatureGauge = promauto.NewGauge(prometheus.GaugeOpts{
+	temperatureGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_temperature",
 		Help: "Ambient temperature in C",
-	})
-	humidityGauge = promauto.NewGauge(prometheus.GaugeOpts{
+	}, []string{Label_Sensor})
+	humidityGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_humidity",
 		Help: "Ambient relative humidity",
-	})
-	co2Gauge = promauto.NewGauge(prometheus.GaugeOpts{
+	}, []string{Label_Sensor})
+	co2Gauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_co2",
 		Help: "CO2 in ppm",
-	})
+	}, []string{Label_Sensor})
 )
 
 func main() {
@@ -155,7 +114,7 @@ func main() {
 
 	recordMetrics(&co2Sensor, &PMSA003ISensor)
 
-	InfoLog.Printf("Started sensor collection service at %v \n", listenAddress)
+	InfoLog.Printf("Started sensor collection service at %s \n", *listenAddress)
 	http.Handle("/metrics", promhttp.Handler())
 	http.ListenAndServe(*listenAddress, nil)
 }
