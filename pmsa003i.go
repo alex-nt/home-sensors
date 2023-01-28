@@ -7,7 +7,7 @@ import (
 	"periph.io/x/conn/v3/i2c"
 )
 
-type PMSA0003I struct {
+type PMSA003I struct {
 	device         *i2c.Dev
 	PM10Standard   uint16
 	PM25Standard   uint16
@@ -23,11 +23,11 @@ type PMSA0003I struct {
 	Particles100um uint16
 }
 
-func NewPMSA0003I(device *i2c.Dev) PMSA0003I {
-	return PMSA0003I{device: device}
+func NewPMSA003I(device *i2c.Dev) PMSA003I {
+	return PMSA003I{device: device}
 }
 
-func (pmsa *PMSA0003I) Read() {
+func (pmsa *PMSA003I) Read() {
 	response := make([]byte, 32)
 	var command []byte
 	if err := pmsa.device.Tx(command, response); err != nil {
@@ -59,7 +59,7 @@ func (pmsa *PMSA0003I) Read() {
 	pmsa.Particles100um = binary.BigEndian.Uint16(response[26:28])
 }
 
-func (pmsa *PMSA0003I) crc(data []byte) error {
+func (pmsa *PMSA003I) crc(data []byte) error {
 	checksum := binary.BigEndian.Uint16(data[30:32])
 	check := sum(data[0:30])
 	if check != checksum {
