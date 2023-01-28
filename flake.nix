@@ -71,6 +71,20 @@
           in {
             options.alex-nt.services.home-sensors = {
               enable = mkEnableOption "Enables the home-sensors prometheus-collector service";
+              port = lib.mkOption {
+                type = lib.types.port;
+                default = 2112;
+                description = ''
+                  Which port this service should listen on.
+                '';
+              };
+              listenAddress = mkOption {
+                type = types.str;
+                default = "0.0.0.0";
+                description = lib.mdDoc ''
+                  Address to listen on for the exporter.
+                '';
+              };
             };
 
             config = mkIf cfg.enable {
@@ -81,7 +95,7 @@
                   let pkg = self.packages.${pkgs.system}.default;
                   in {
                     Restart = "on-failure";
-                    ExecStart = "${pkg}/bin/go-home-sensors";
+                    ExecStart = "${pkg}/bin/go-home-sensors --web.listen-address=${cfg.listenAddress}:${builtins.toString cfg.port}";
                     DynamicUser = "yes";
                     SupplementaryGroups = [ "i2c" ];
                   };

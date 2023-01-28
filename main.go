@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 	"os"
@@ -129,6 +130,9 @@ var (
 )
 
 func main() {
+	listenAddress := flag.String("web.listen-address", ":2112", "Define the address and port at which to listen")
+	flag.Parse()
+
 	// Make sure periph is initialized.
 	if _, err := host.Init(); err != nil {
 		log.Fatal(err)
@@ -151,7 +155,7 @@ func main() {
 
 	recordMetrics(&co2Sensor, &PMSA003ISensor)
 
-	InfoLog.Println("Started sensor collection service")
+	InfoLog.Printf("Started sensor collection service at %v \n", listenAddress)
 	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(":2112", nil)
+	http.ListenAndServe(*listenAddress, nil)
 }
