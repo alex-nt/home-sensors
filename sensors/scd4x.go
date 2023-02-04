@@ -1,4 +1,4 @@
-package main
+package sensors
 
 import (
 	"bytes"
@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"azuremyst.org/go-home-sensors/log"
 	"periph.io/x/conn/v3/i2c"
 )
 
@@ -135,7 +136,7 @@ func (scd4x *SCD4X) ReadCommandValue(command *Command, value uint16) ([]byte, er
 func (scd4x *SCD4X) dataReady() bool {
 	response, err := scd4x.ReadCommand(&SCD4X_DATAREADY)
 	if err != nil {
-		ErrorLog.Printf("Data not ready %v", err)
+		log.ErrorLog.Printf("Data not ready %v", err)
 		return false
 	}
 	return !((response[0]&0x07 == 0) && (response[1] == 0))
@@ -218,7 +219,7 @@ func (scd4x *SCD4X) checkBufferCRC(buffer []byte) error {
 func (scd4x *SCD4X) IsCalibrationEnabled() bool {
 	response, err := scd4x.ReadCommand(&SCD4X_GETASCE)
 	if err != nil {
-		ErrorLog.Printf("Calibration status could not be read %v", err)
+		log.ErrorLog.Printf("Calibration status could not be read %v", err)
 		return false
 	}
 	return response[1] == 1

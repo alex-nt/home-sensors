@@ -2,10 +2,11 @@ package main
 
 import (
 	"flag"
-	"log"
 	"net/http"
-	"os"
 	"time"
+
+	"azuremyst.org/go-home-sensors/log"
+	"azuremyst.org/go-home-sensors/sensors"
 
 	"periph.io/x/conn/v3/i2c"
 	"periph.io/x/conn/v3/i2c/i2creg"
@@ -21,17 +22,7 @@ const (
 	Label_Particle_Size = "particleSize"
 )
 
-var (
-	ErrorLog *log.Logger
-	InfoLog  *log.Logger
-)
-
-func init() {
-	ErrorLog = log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
-	InfoLog = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
-}
-
-func recordMetrics(scd4x *SCD4X, PMSA003I *PMSA003I) {
+func recordMetrics(scd4x *sensors.SCD4X, PMSA003I *sensors.PMSA003I) {
 	go func() {
 		for {
 			temperatureGauge.WithLabelValues("scd41").Set(scd4x.GetTemperature())
@@ -94,27 +85,27 @@ func main() {
 
 	// Make sure periph is initialized.
 	if _, err := host.Init(); err != nil {
-		log.Fatal(err)
+		log.ErrorLog.Fatal(err)
 	}
 
 	// Use i2creg I²C bus registry to find the first available I²C bus.
 	b, err := i2creg.Open("")
 	if err != nil {
-		log.Fatal(err)
+		log.ErrorLog.Fatal(err)
 	}
 	defer b.Close()
 
 	// Dev is a valid conn.Conn.
 	scd41 := &i2c.Dev{Addr: 0x62, Bus: b}
-	co2Sensor := NewSCD4X(scd41)
+	co2Sensor := sensors.NewSCD4X(scd41)
 	co2Sensor.StartPeriodicMeasurement()
 
 	PMSA003I := &i2c.Dev{Addr: 0x12, Bus: b}
-	PMSA003ISensor := NewPMSA003I(PMSA003I)
+	PMSA003ISensor := sensors.NewPMSA003I(PMSA003I)
 
 	recordMetrics(&co2Sensor, &PMSA003ISensor)
 
-	InfoLog.Printf("Started sensor collection service at %s \n", *listenAddress)
+	log.InfoLog.Printf("Started sensor collection service at %s \n", *listenAddress)
 	http.Handle("/metrics", promhttp.Handler())
 	http.ListenAndServe(*listenAddress, nil)
 }

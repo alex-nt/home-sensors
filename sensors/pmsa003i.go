@@ -1,9 +1,10 @@
-package main
+package sensors
 
 import (
 	"encoding/binary"
 	"fmt"
 
+	"azuremyst.org/go-home-sensors/log"
 	"periph.io/x/conn/v3/i2c"
 )
 
@@ -31,17 +32,17 @@ func (pmsa *PMSA003I) Read() {
 	response := make([]byte, 32)
 	var command []byte
 	if err := pmsa.device.Tx(command, response); err != nil {
-		ErrorLog.Printf("error while reading from device")
+		log.ErrorLog.Printf("error while reading from device")
 		return
 	}
 
 	frameLength := binary.BigEndian.Uint16(response[2:4])
 	if frameLength != 28 {
-		ErrorLog.Printf("invalid PM2.5 frame length")
+		log.ErrorLog.Printf("invalid PM2.5 frame length")
 		return
 	}
 	if err := pmsa.crc(response); err != nil {
-		ErrorLog.Printf("crc check failed %v", err)
+		log.ErrorLog.Printf("crc check failed %v", err)
 		return
 	}
 
