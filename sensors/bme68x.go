@@ -285,17 +285,12 @@ type BME68XTPHSettings struct {
 	osTemp uint8 // Temperature oversampling
 	osPres uint8 // Pressure oversampling
 	filter uint8 // Filter coefficient
-	odr    uint8 // Standby time between sequential mode measurement profiles.
 }
 
 type BME68XHeaterConf struct {
-	enable           uint8  // Enable gas measurement
-	heatr_temp       uint16 // Store the heater temperature for forced mode degree Celsius
-	heatr_dur        uint16 // Store the heating duration for forced mode in milliseconds
-	heatr_temp_prof  uint16 // Store the heater temperature profile in degree Celsius
-	heatr_dur_prof   uint16 // Store the heating duration profile in milliseconds
-	profile_len      uint8  // Variable to store the length of the heating profile
-	shared_heatr_dur uint16 // Variable to store heating duration for parallel mode in milliseconds
+	enable     uint8  // Enable gas measurement
+	heatr_temp uint16 // Store the heater temperature for forced mode degree Celsius
+	heatr_dur  uint16 // Store the heating duration for forced mode in milliseconds
 }
 
 func NewBME68X(device *i2c.Dev) BME68X {
@@ -428,20 +423,6 @@ func (bme68x *BME68X) getCalibrationData() error {
 	bme68x.calibData.res_heat_val = int8(coefficients[BME68X_IDX_RES_HEAT_VAL])
 	bme68x.calibData.range_sw_err = int8(coefficients[BME68X_IDX_RANGE_SW_ERR]&BME68X_RSERROR_MSK) / 16
 
-	return nil
-}
-
-func bytesToWord(msb, lsb uint8) uint16 {
-	return uint16(msb)<<8 | uint16(lsb)
-}
-
-func (bme68x *BME68X) getOperatingMode() error {
-	response := make([]byte, 1)
-	if err := bme68x.device.Tx([]byte{BME68X_REG_CTRL_MEAS}, response); err != nil {
-		return err
-	}
-
-	bme68x.status = response[0] & BME68X_MODE_MSK
 	return nil
 }
 
@@ -651,6 +632,7 @@ func (bme68x *BME68X) GetSensorData() {
 		bme68x.Data.Humidity = float32(bme68x.humidity) / 1000.0
 		bme68x.Data.Pressure = float32(bme68x.pressure) / 100.0
 		bme68x.Data.GasResistance = float32(bme68x.gasResistance)
+		bme68x.computeAQI()
 
 		log.InfoLog.Printf("%+v - metrics", bme68x.Data)
 		log.InfoLog.Printf("%+v %+v %+v %+v %+v- metrics", bme68x.temperature, bme68x.humidity, bme68x.pressure, bme68x.gasResistance, bme68x.burnInGasData)
