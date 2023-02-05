@@ -610,13 +610,15 @@ func (bme68x *BME68X) GetSensorData() {
 
 		regs, err := bme68x.readRegs(BME68X_REG_FIELD0, BME68X_LEN_FIELD)
 		if err != nil {
-			log.ErrorLog.Printf("Could not read data; %v\n", err)
+			log.ErrorLog.Printf("Could not read data; %+v\n", err)
 			return
 		}
 
 		bme68x.status = regs[0] & BME68X_NEW_DATA_MSK
 		bme68x.gasIdx = regs[0] & BME68X_GAS_INDEX_MSK
 		bme68x.measIdx = regs[1]
+
+		log.InfoLog.Println("Calibration data %v", bme68x.calibData)
 
 		adc_pres := (uint32(regs[2]) * 4096) | (uint32(regs[3]) * 16) | (uint32(regs[4]) / 16)
 		adc_temp := (uint32(regs[5]) * 4096) | (uint32(regs[6]) * 16) | (uint32(regs[7]) / 16)
@@ -650,8 +652,8 @@ func (bme68x *BME68X) GetSensorData() {
 		bme68x.Data.Pressure = float32(bme68x.pressure) / 100.0
 		bme68x.Data.GasResistance = float32(bme68x.gasResistance)
 
-		log.InfoLog.Printf("%v - metrics", bme68x.Data)
-		log.InfoLog.Printf("%v %v %v %v %v- metrics", bme68x.temperature, bme68x.humidity, bme68x.pressure, bme68x.gasResistance, bme68x.burnInGasData)
+		log.InfoLog.Printf("%+v - metrics", bme68x.Data)
+		log.InfoLog.Printf("%+v %+v %+v %+v %+v- metrics", bme68x.temperature, bme68x.humidity, bme68x.pressure, bme68x.gasResistance, bme68x.burnInGasData)
 	}
 }
 
