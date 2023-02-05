@@ -585,6 +585,7 @@ func (bme68x *BME68X) GetSensorData() {
 
 	for i := 0; i < 10; i++ {
 		status, err := bme68x.readRegs(BME68X_REG_FIELD0, 1)
+		log.InfoLog.Printf("Status %b", status[0])
 		if err != nil {
 			log.ErrorLog.Printf("Could not read status; %v\n", err)
 			return
