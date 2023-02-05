@@ -537,21 +537,21 @@ func (bme68x *BME68X) getGasStatus() (uint8, error) {
 	return (data[0] & BME68X_RUN_GAS_MSK) >> BME68X_RUN_GAS_POS, nil
 }
 
-func (bme680 *BME68X) setPowerMode(mode uint8) error {
-	if err := bme680.getPowerMode(); err != nil {
+func (bme68x *BME68X) setPowerMode(mode uint8) error {
+	if err := bme68x.getPowerMode(); err != nil {
 		return err
 	}
-	if bme680.status != mode {
-		if err := bme680.setBits(BME68X_REG_CTRL_MEAS, BME68X_MODE_MSK, 0, mode); err != nil {
+	if bme68x.status != mode {
+		if err := bme68x.setBits(BME68X_REG_CTRL_MEAS, BME68X_MODE_MSK, 0, mode); err != nil {
 			return err
 		}
 
 		for {
-			log.InfoLog.Printf("Desired %b actual %b", mode, bme680.status)
-			if err := bme680.getPowerMode(); err != nil {
+			log.InfoLog.Printf("Desired %b actual %b", mode, bme68x.status)
+			if err := bme68x.getPowerMode(); err != nil {
 				return err
 			}
-			if bme680.status != mode {
+			if bme68x.status != mode {
 				time.Sleep(10 * time.Millisecond)
 				continue
 			}
@@ -561,12 +561,12 @@ func (bme680 *BME68X) setPowerMode(mode uint8) error {
 	return nil
 }
 
-func (bme680 *BME68X) getPowerMode() error {
-	data, err := bme680.readRegs(BME68X_REG_CTRL_MEAS, 1)
+func (bme68x *BME68X) getPowerMode() error {
+	data, err := bme68x.readRegs(BME68X_REG_CTRL_MEAS, 1)
 	if err != nil {
 		return err
 	}
-	bme680.status = (data[0] & BME68X_MODE_MSK)
+	bme68x.status = (data[0] & BME68X_MODE_MSK)
 	return nil
 }
 
@@ -578,7 +578,6 @@ func (bme68x *BME68X) GetSensorData() {
 
 	for i := 0; i < 10; i++ {
 		status, err := bme68x.readRegs(BME68X_REG_FIELD0, 1)
-		log.InfoLog.Printf("Status %b", status[0])
 		if err != nil {
 			log.ErrorLog.Printf("Could not read status; %v\n", err)
 			return
@@ -680,16 +679,16 @@ func (bme68x *BME68X) computeAQI() {
 }
 
 // Convert the raw temperature to degrees C using calibration_data
-func (bme680 *BME68X) computeTemperature(adc_temp uint32) int16 {
+func (bme68x *BME68X) computeTemperature(adc_temp uint32) int16 {
 	var var1, var2, var3 int64
-	var1 = int64((int32(adc_temp) >> 3) - (int32(bme680.calibData.par_t1) << 1))
-	var2 = int64((var1 * int64(bme680.calibData.par_t2)) >> 11)
+	var1 = int64((int32(adc_temp) >> 3) - (int32(bme68x.calibData.par_t1) << 1))
+	var2 = int64((var1 * int64(bme68x.calibData.par_t2)) >> 11)
 	var3 = ((var1 >> 1) * (var1 >> 1)) >> 12
-	var3 = ((var3) * int64(bme680.calibData.par_t3<<4)) >> 14
+	var3 = ((var3) * int64(bme68x.calibData.par_t3<<4)) >> 14
 
 	// Save teperature data for pressure calculations
-	bme680.calibData.t_fine = int32(var2 + var3)
-	return int16(((bme680.calibData.t_fine * 5) + 128) >> 8)
+	bme68x.calibData.t_fine = int32(var2 + var3)
+	return int16(((bme68x.calibData.t_fine * 5) + 128) >> 8)
 }
 
 /* This value is used to check precedence to multiplication or division
@@ -700,17 +699,17 @@ func (bme680 *BME68X) computeTemperature(adc_temp uint32) int16 {
 const pres_ovf_check = int32(0x40000000)
 
 // This internal API is used to calculate the pressure value
-func (bme680 *BME68X) computePressure(adc_pressure uint32) uint32 {
+func (bme68x *BME68X) computePressure(adc_pressure uint32) uint32 {
 	var var1, var2, var3, pressureComp int32
 
-	var1 = ((bme680.calibData.t_fine) >> 1) - 64000
-	var2 = ((((var1 >> 2) * (var1 >> 2)) >> 11) * int32(bme680.calibData.par_p6)) >> 2
-	var2 = var2 + ((var1 * int32(bme680.calibData.par_p5)) << 1)
-	var2 = (var2 >> 2) + (int32(bme680.calibData.par_p4) << 16)
-	var1 = (((((var1 >> 2) * (var1 >> 2)) >> 13) * (int32(bme680.calibData.par_p3) << 5)) >> 3) +
-		((int32(bme680.calibData.par_p2) * var1) >> 1)
+	var1 = ((bme68x.calibData.t_fine) >> 1) - 64000
+	var2 = ((((var1 >> 2) * (var1 >> 2)) >> 11) * int32(bme68x.calibData.par_p6)) >> 2
+	var2 = var2 + ((var1 * int32(bme68x.calibData.par_p5)) << 1)
+	var2 = (var2 >> 2) + (int32(bme68x.calibData.par_p4) << 16)
+	var1 = (((((var1 >> 2) * (var1 >> 2)) >> 13) * (int32(bme68x.calibData.par_p3) << 5)) >> 3) +
+		((int32(bme68x.calibData.par_p2) * var1) >> 1)
 	var1 = var1 >> 18
-	var1 = ((32768 + var1) * int32(bme680.calibData.par_p1)) >> 15
+	var1 = ((32768 + var1) * int32(bme68x.calibData.par_p1)) >> 15
 	pressureComp = 1048576 - int32(adc_pressure)
 	pressureComp = int32((pressureComp - (var2 >> 12)) * int32(3125))
 	if pressureComp >= pres_ovf_check {
@@ -719,26 +718,26 @@ func (bme680 *BME68X) computePressure(adc_pressure uint32) uint32 {
 		pressureComp = ((pressureComp << 1) / var1)
 	}
 
-	var1 = (int32(bme680.calibData.par_p9) * int32(((pressureComp>>3)*(pressureComp>>3))>>13)) >> 12
-	var2 = (int32(pressureComp>>2) * int32(bme680.calibData.par_p8)) >> 13
-	var3 = (int32(pressureComp>>8) * int32(pressureComp>>8) * int32(pressureComp>>8) * int32(bme680.calibData.par_p10)) >> 17
-	pressureComp = int32(pressureComp) + ((var1 + var2 + var3 + (int32(bme680.calibData.par_p7) << 7)) >> 4)
+	var1 = (int32(bme68x.calibData.par_p9) * int32(((pressureComp>>3)*(pressureComp>>3))>>13)) >> 12
+	var2 = (int32(pressureComp>>2) * int32(bme68x.calibData.par_p8)) >> 13
+	var3 = (int32(pressureComp>>8) * int32(pressureComp>>8) * int32(pressureComp>>8) * int32(bme68x.calibData.par_p10)) >> 17
+	pressureComp = int32(pressureComp) + ((var1 + var2 + var3 + (int32(bme68x.calibData.par_p7) << 7)) >> 4)
 	return uint32(pressureComp)
 }
 
-func (bme680 *BME68X) computeHumidity(adc_humidity uint16) uint32 {
+func (bme68x *BME68X) computeHumidity(adc_humidity uint16) uint32 {
 	var var1, var2, var3, var4, var5, var6, tempScaled, calcHum int32
 
-	tempScaled = ((int32(bme680.calibData.t_fine) * 5) + 128) >> 8
-	var1 = int32(int32(adc_humidity)-(int32(int32(bme680.calibData.par_h1)*16))) -
-		(((tempScaled * int32(bme680.calibData.par_h3)) / int32(100)) >> 1)
-	var2 = (int32(bme680.calibData.par_h2) *
-		(((tempScaled * int32(bme680.calibData.par_h4)) / int32(100)) +
-			(((tempScaled * ((tempScaled * int32(bme680.calibData.par_h5)) / int32(100))) >> 6) / int32(100)) +
+	tempScaled = ((int32(bme68x.calibData.t_fine) * 5) + 128) >> 8
+	var1 = int32(int32(adc_humidity)-(int32(int32(bme68x.calibData.par_h1)*16))) -
+		(((tempScaled * int32(bme68x.calibData.par_h3)) / int32(100)) >> 1)
+	var2 = (int32(bme68x.calibData.par_h2) *
+		(((tempScaled * int32(bme68x.calibData.par_h4)) / int32(100)) +
+			(((tempScaled * ((tempScaled * int32(bme68x.calibData.par_h5)) / int32(100))) >> 6) / int32(100)) +
 			int32(1<<14))) >> 10
 	var3 = var1 * var2
-	var4 = int32(bme680.calibData.par_h6) << 7
-	var4 = (var4 + ((tempScaled * int32(bme680.calibData.par_h7)) / int32(100))) >> 4
+	var4 = int32(bme68x.calibData.par_h6) << 7
+	var4 = (var4 + ((tempScaled * int32(bme68x.calibData.par_h7)) / int32(100))) >> 4
 	var5 = ((var3 >> 14) * (var3 >> 14)) >> 10
 	var6 = (var4 * var5) >> 1
 	calcHum = (((var3 + var6) >> 10) * int32(1000)) >> 12
@@ -773,9 +772,9 @@ func (bme68x *BME68X) calcGasResistanceLow(gas_res_adc uint16, gas_range uint8) 
 
 func (bme68x *BME68X) calcGasResistanceHigh(gas_res_adc uint16, gas_range uint8) uint32 {
 	var1 := uint32(262144) >> gas_range
-	var2 := int32(gas_res_adc) - int32(512)
+	var2 := int32(gas_res_adc) - 512
 
-	var2 *= int32(3)
+	var2 *= 3
 	var2 = int32(4096) + var2
 
 	// multiplying 10000 then dividing then multiplying by 100 instead of multiplying by 1000000 to prevent overflow
