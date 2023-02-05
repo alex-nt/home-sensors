@@ -62,14 +62,14 @@ func (pmsa *PMSA003I) Read() {
 
 func (pmsa *PMSA003I) crc(data []byte) error {
 	checksum := binary.BigEndian.Uint16(data[30:32])
-	check := sum(data[0:30])
+	check := sumUINT8(data[0:30])
 	if check != checksum {
 		return fmt.Errorf("invalid PM2.5 checksum")
 	}
 	return nil
 }
 
-func sum(array []uint8) uint16 {
+func sumUINT8(array []uint8) uint16 {
 	var result uint16
 	for _, v := range array {
 		result += uint16(v)

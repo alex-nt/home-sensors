@@ -6,22 +6,16 @@
 
   outputs = { self, nixpkgs }:
     let
-
       # to work with older version of flakes
       lastModifiedDate = self.lastModifiedDate or self.lastModified or "19700101";
-
       # Generate a user-friendly version number.
       version = builtins.substring 0 8 lastModifiedDate;
-
       # System types to support.
       supportedSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
-
       # Helper function to generate an attrset '{ x86_64-linux = f "x86_64-linux"; ... }'.
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-
       # Nixpkgs instantiated for supported system types.
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
-
     in
     {
       apps = forAllSystems (system: {
@@ -31,9 +25,11 @@
         };
       });
       devShells = forAllSystems (system:
-        let pkgs = nixpkgsFor.${system};
-        in {
-          default = pkgs.mkShell {
+        let
+          pkgs = nixpkgsFor.${system};
+        in
+        {
+          go-home-sensors = pkgs.mkShell {
             buildInputs = with pkgs; [ go gopls gotools go-tools ];
           };
         });
@@ -67,8 +63,10 @@
       nixosModules = {
         home-sensors = { config, lib, pkgs, ... }:
           with lib;
-          let cfg = config.alex-nt.services.home-sensors;
-          in {
+          let
+            cfg = config.alex-nt.services.home-sensors;
+          in
+          {
             options.alex-nt.services.home-sensors = {
               enable = mkEnableOption "Enables the home-sensors prometheus-collector service";
               port = lib.mkOption {
@@ -92,8 +90,10 @@
                 wantedBy = [ "multi-user.target" ];
 
                 serviceConfig =
-                  let pkg = self.packages.${pkgs.system}.default;
-                  in {
+                  let
+                    pkg = self.packages.${pkgs.system}.default;
+                  in
+                  {
                     Restart = "on-failure";
                     ExecStart = "${pkg}/bin/go-home-sensors --web.listen-address=${cfg.listenAddress}:${builtins.toString cfg.port}";
                     DynamicUser = "yes";
@@ -107,6 +107,6 @@
       # The default package for 'nix build'. This makes sense if the
       # flake provides only one package or there is a clear "main"
       # package.
-      defaultPackage = forAllSystems (system: self.packages.${system}.go-home-sensors);
+      defaultPackage = forAllSystems (system: self.packages.${system}.default);
     };
 }

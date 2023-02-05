@@ -22,7 +22,7 @@ const (
 	Label_Particle_Size = "particleSize"
 )
 
-func recordMetrics(scd4x *sensors.SCD4X, PMSA003I *sensors.PMSA003I) {
+func recordMetrics(scd4x *sensors.SCD4X, PMSA003I *sensors.PMSA003I, bme68x *sensors.BME68X) {
 	go func() {
 		for {
 			temperatureGauge.WithLabelValues("scd41").Set(scd4x.GetTemperature())
@@ -44,7 +44,14 @@ func recordMetrics(scd4x *sensors.SCD4X, PMSA003I *sensors.PMSA003I) {
 			particlesCountGauge.WithLabelValues("pmsa003i", "25pm").Set(float64(PMSA003I.Particles25um))
 			particlesCountGauge.WithLabelValues("pmsa003i", "50pm").Set(float64(PMSA003I.Particles50um))
 			particlesCountGauge.WithLabelValues("pmsa003i", "100pm").Set(float64(PMSA003I.Particles100um))
-			time.Sleep(15 * time.Second)
+
+			bme68x.GetSensorData()
+			temperatureGauge.WithLabelValues("bme68x").Set(float64(bme68x.Data.Temperature))
+			humidityGauge.WithLabelValues("bme68x").Set(float64(bme68x.Data.Humidity))
+			pressureGauge.WithLabelValues("bme68x").Set(float64(bme68x.Data.Pressure))
+			gasResistanceGauge.WithLabelValues("bme68x").Set(float64(bme68x.Data.GasResistance))
+			iaqGauge.WithLabelValues("bme68x").Set(float64(bme68x.Data.IAQ))
+			time.Sleep(10 * time.Second)
 		}
 	}()
 }
@@ -77,6 +84,18 @@ var (
 		Name: "room_co2",
 		Help: "CO2 in ppm",
 	}, []string{Label_Sensor})
+	pressureGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "room_pressure",
+		Help: "Pressure Hpa",
+	}, []string{Label_Sensor})
+	gasResistanceGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "room_gasResistance",
+		Help: "Gas resistance in Ohm",
+	}, []string{Label_Sensor})
+	iaqGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "room_iaq",
+		Help: "Indoor Air Quality",
+	}, []string{Label_Sensor})
 )
 
 func main() {
@@ -96,14 +115,15 @@ func main() {
 	defer b.Close()
 
 	// Dev is a valid conn.Conn.
-	scd41 := &i2c.Dev{Addr: 0x62, Bus: b}
-	co2Sensor := sensors.NewSCD4X(scd41)
+	co2Sensor := sensors.NewSCD4X(&i2c.Dev{Addr: 0x62, Bus: b})
 	co2Sensor.StartPeriodicMeasurement()
 
-	PMSA003I := &i2c.Dev{Addr: 0x12, Bus: b}
-	PMSA003ISensor := sensors.NewPMSA003I(PMSA003I)
+	PMSA003ISensor := sensors.NewPMSA003I(&i2c.Dev{Addr: 0x12, Bus: b})
 
-	recordMetrics(&co2Sensor, &PMSA003ISensor)
+	bme68x := sensors.NewBME68X(&i2c.Dev{Addr: 0x76, Bus: b})
+	bme68x.Init()
+
+	recordMetrics(&co2Sensor, &PMSA003ISensor, &bme68x)
 
 	log.InfoLog.Printf("Started sensor collection service at %s \n", *listenAddress)
 	http.Handle("/metrics", promhttp.Handler())
