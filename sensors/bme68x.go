@@ -698,8 +698,8 @@ func (bme68x *BME68X) computeAQI() {
 // Convert the raw temperature to degrees C using calibration_data
 func (bme680 *BME68X) computeTemperature(adc_temp uint32) int16 {
 	var var1, var2, var3 int64
-	var1 = int64((adc_temp)>>3) - int64(bme680.calibData.par_t1<<1)
-	var2 = (var1 * int64(bme680.calibData.par_t2)) >> 11
+	var1 = int64((int32(adc_temp) >> 3) - (int32(bme680.calibData.par_t1) << 1))
+	var2 = int64((var1 * int64(bme680.calibData.par_t2)) >> 11)
 	var3 = ((var1 >> 1) * (var1 >> 1)) >> 12
 	var3 = ((var3) * int64(bme680.calibData.par_t3<<4)) >> 14
 
