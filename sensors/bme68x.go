@@ -313,6 +313,11 @@ func (bme68x *BME68X) Init() {
 		return
 	}
 
+	if err := bme68x.setPowerMode(BME68X_SLEEP_MODE); err != nil {
+		log.ErrorLog.Printf("could not set to sleep; %v/n", err)
+		return
+	}
+
 	if err := bme68x.getCalibrationData(); err != nil {
 		log.ErrorLog.Printf("could not retrieve calibrationData; %v/n", err)
 		return
@@ -549,21 +554,25 @@ func (bme68x *BME68X) getGasStatus() (uint8, error) {
 }
 
 func (bme680 *BME68X) setPowerMode(mode uint8) error {
-	if err := bme680.setBits(BME68X_REG_CTRL_MEAS, BME68X_MODE_MSK, 0, mode); err != nil {
+	if err := bme680.getPowerMode(); err != nil {
 		return err
 	}
-
-	for {
-		log.InfoLog.Printf("Desired %b actual %b", mode, bme680.status)
-		err := bme680.getPowerMode()
-		if err != nil {
+	if bme680.status != mode {
+		if err := bme680.setBits(BME68X_REG_CTRL_MEAS, BME68X_MODE_MSK, 0, mode); err != nil {
 			return err
 		}
-		if bme680.status != mode {
-			time.Sleep(10 * time.Millisecond)
-			continue
+
+		for {
+			log.InfoLog.Printf("Desired %b actual %b", mode, bme680.status)
+			if err := bme680.getPowerMode(); err != nil {
+				return err
+			}
+			if bme680.status != mode {
+				time.Sleep(10 * time.Millisecond)
+				continue
+			}
+			break
 		}
-		break
 	}
 	return nil
 }
@@ -573,7 +582,7 @@ func (bme680 *BME68X) getPowerMode() error {
 	if err != nil {
 		return err
 	}
-	bme680.status = data[0]
+	bme680.status = (data[0] & BME68X_MODE_MSK)
 	return nil
 }
 
