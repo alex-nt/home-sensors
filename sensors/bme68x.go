@@ -605,7 +605,7 @@ func (bme68x *BME68X) GetSensorData() {
 		adc_temp := (uint32(regs[5]) * 4096) | (uint32(regs[6]) * 16) | (uint32(regs[7]) / 16)
 		adc_hum := uint16((uint32(regs[8]) * 256) | uint32(regs[9]))
 		adc_gas_res_low := uint16((uint32(regs[13]) * 4) | (uint32(regs[14]) / 64))
-		adc_gas_res_high := uint16(uint32((regs[15])*4) | (uint32(regs[16]) / 64))
+		adc_gas_res_high := uint16((uint32(regs[15]) * 4) | (uint32(regs[16]) / 64))
 		gas_range_l := regs[14] & BME68X_GAS_RANGE_MSK
 		gas_range_h := regs[16] & BME68X_GAS_RANGE_MSK
 
