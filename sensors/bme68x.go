@@ -618,7 +618,7 @@ func (bme68x *BME68X) GetSensorData() {
 		bme68x.gasIdx = regs[0] & BME68X_GAS_INDEX_MSK
 		bme68x.measIdx = regs[1]
 
-		log.InfoLog.Println("Calibration data %v", bme68x.calibData)
+		log.InfoLog.Printf("Calibration data %+v\n", bme68x.calibData)
 
 		adc_pres := (uint32(regs[2]) * 4096) | (uint32(regs[3]) * 16) | (uint32(regs[4]) / 16)
 		adc_temp := (uint32(regs[5]) * 4096) | (uint32(regs[6]) * 16) | (uint32(regs[7]) / 16)
