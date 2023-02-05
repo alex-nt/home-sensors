@@ -304,17 +304,56 @@ func NewBME68X(device *i2c.Dev) BME68X {
 }
 
 func (bme68x *BME68X) Init() {
-	bme68x.softReset()
-	bme68x.chipID()
-	bme68x.getCalibrationData()
-	bme68x.setHumidityOversample(BME68X_OS_2X)
-	bme68x.setPressureOversample(BME68X_OS_4X)
-	bme68x.setTemperatureOversample(BME68X_OS_8X)
-	bme68x.setFilter(BME68X_FILTER_SIZE_3)
-	bme68x.setGasStatus()
-	bme68x.SetGasHeaterTemperature(320)
-	bme68x.SetGasHeaterDuration(150)
-	bme68x.SetGasHeaterProfile(0)
+	if err := bme68x.softReset(); err != nil {
+		log.ErrorLog.Printf("could not reset device; %v/n", err)
+		return
+	}
+	if err := bme68x.chipID(); err != nil {
+		log.ErrorLog.Printf("could not read chipId; %v/n", err)
+		return
+	}
+
+	if err := bme68x.getCalibrationData(); err != nil {
+		log.ErrorLog.Printf("could not retrieve calibrationData; %v/n", err)
+		return
+	}
+
+	if err := bme68x.setHumidityOversample(BME68X_OS_2X); err != nil {
+		log.ErrorLog.Printf("could not set humidity oversample; %v/n", err)
+		return
+	}
+
+	if err := bme68x.setPressureOversample(BME68X_OS_4X); err != nil {
+		log.ErrorLog.Printf("could not set pressure oversample; %v/n", err)
+		return
+	}
+
+	if err := bme68x.setTemperatureOversample(BME68X_OS_8X); err != nil {
+		log.ErrorLog.Printf("could not set temperature oversample; %v/n", err)
+		return
+	}
+	if err := bme68x.setFilter(BME68X_FILTER_SIZE_3); err != nil {
+		log.ErrorLog.Printf("could not set gas filter; %v/n", err)
+		return
+	}
+
+	if err := bme68x.setGasStatus(); err != nil {
+		log.ErrorLog.Printf("could not enable gas heater; %v/n", err)
+		return
+	}
+
+	if err := bme68x.SetGasHeaterTemperature(320); err != nil {
+		log.ErrorLog.Printf("could not set gas heater temperature; %v/n", err)
+		return
+	}
+	if err := bme68x.SetGasHeaterDuration(150); err != nil {
+		log.ErrorLog.Printf("could not set gas heater duration; %v/n", err)
+		return
+	}
+	if err := bme68x.SetGasHeaterProfile(0); err != nil {
+		log.ErrorLog.Printf("could not set gas heater profile; %v/n", err)
+		return
+	}
 }
 
 func (bme68x *BME68X) chipID() error {
@@ -540,14 +579,14 @@ func (bme680 *BME68X) getPowerMode() error {
 
 func (bme68x *BME68X) GetSensorData() {
 	if err := bme68x.setPowerMode(BME68X_FORCED_MODE); err != nil {
-		log.ErrorLog.Println("Could not toggle to forced mode; %v", err)
+		log.ErrorLog.Printf("Could not toggle to forced mode; %v\n", err)
 		return
 	}
 
 	for i := 0; i < 10; i++ {
 		status, err := bme68x.readRegs(BME68X_REG_FIELD0, 1)
 		if err != nil {
-			log.ErrorLog.Println("Could not read status; %v", err)
+			log.ErrorLog.Printf("Could not read status; %v\n", err)
 			return
 		}
 
@@ -558,7 +597,7 @@ func (bme68x *BME68X) GetSensorData() {
 
 		regs, err := bme68x.readRegs(BME68X_REG_FIELD0, BME68X_LEN_FIELD)
 		if err != nil {
-			log.ErrorLog.Println("Could not read data; %v", err)
+			log.ErrorLog.Printf("Could not read data; %v\n", err)
 			return
 		}
 
