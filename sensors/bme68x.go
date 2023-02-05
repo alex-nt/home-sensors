@@ -52,7 +52,7 @@ const (
 	BME68X_REG_CONFIG        = uint8(0x75) // CONFIG address
 	BME68X_REG_MEM_PAGE      = uint8(0xf3) // MEM_PAGE address
 	BME68X_REG_UNIQUE_ID     = uint8(0x83) // Unique ID address
-	BME68X_REG_COEFF1        = uint8(0x8a) // Register for 1st group of coefficients
+	BME68X_REG_COEFF1        = uint8(0x89) // Register for 1st group of coefficients - TODO: Check deviation from vendor
 	BME68X_REG_CHIP_ID       = uint8(0xd0) // Chip ID address
 	BME68X_REG_SOFT_RESET    = uint8(0xe0) // Soft reset address
 	BME68X_REG_COEFF2        = uint8(0xe1) // Register for 2nd group of coefficients
@@ -382,13 +382,10 @@ func (bme68x *BME68X) chipID() error {
 func (bme68x *BME68X) getCalibrationData() error {
 	coefficients := make([]byte, BME68X_LEN_COEFF_ALL)
 
-	if err := bme68x.device.Tx([]byte{BME68X_REG_COEFF1}, coefficients[0:BME68X_LEN_COEFF1+1]); err != nil {
+	if err := bme68x.device.Tx([]byte{BME68X_REG_COEFF1}, coefficients[0:25]); err != nil {
 		return err
 	}
-	if err := bme68x.device.Tx([]byte{BME68X_REG_COEFF2}, coefficients[BME68X_LEN_COEFF1+1:BME68X_LEN_COEFF1+BME68X_LEN_COEFF2+1]); err != nil {
-		return err
-	}
-	if err := bme68x.device.Tx([]byte{BME68X_REG_COEFF3}, coefficients[BME68X_LEN_COEFF1+BME68X_LEN_COEFF2+1:BME68X_LEN_COEFF_ALL]); err != nil {
+	if err := bme68x.device.Tx([]byte{BME68X_REG_COEFF2}, coefficients[25:42]); err != nil {
 		return err
 	}
 
@@ -756,7 +753,7 @@ func (bme680 *BME68X) computeHumidity(adc_humidity uint16) uint32 {
 			int32(1<<14))) >> 10
 	var3 = var1 * var2
 	var4 = int32(bme680.calibData.par_h6) << 7
-	var4 = ((var4) + ((tempScaled * int32(bme680.calibData.par_h7)) / int32(100))) >> 4
+	var4 = (var4 + ((tempScaled * int32(bme680.calibData.par_h7)) / int32(100))) >> 4
 	var5 = ((var3 >> 14) * (var3 >> 14)) >> 10
 	var6 = (var4 * var5) >> 1
 	calcHum = (((var3 + var6) >> 10) * int32(1000)) >> 12
