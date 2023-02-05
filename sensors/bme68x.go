@@ -1,7 +1,6 @@
 package sensors
 
 import (
-	"encoding/binary"
 	"fmt"
 	"time"
 
@@ -411,8 +410,8 @@ func (bme68x *BME68X) getCalibrationData() error {
 	bme68x.calibData.par_p10 = coefficients[BME68X_IDX_P10]
 
 	/* Humidity related coefficients */
-	bme68x.calibData.par_h1 = uint16(coefficients[BME68X_IDX_H1_MSB]) << 4 | (coefficients[BME68X_IDX_H1_LSB] & BME68X_BIT_H1_DATA_MSK))
-	bme68x.calibData.par_h2 = uint16(oefficients[BME68X_IDX_H2_MSB]) << 4 | (coefficients[BME68X_IDX_H2_LSB] >> 4)
+	bme68x.calibData.par_h1 = uint16(coefficients[BME68X_IDX_H1_MSB])<<4 | uint16(coefficients[BME68X_IDX_H1_LSB]&BME68X_BIT_H1_DATA_MSK)
+	bme68x.calibData.par_h2 = uint16(coefficients[BME68X_IDX_H2_MSB])<<4 | uint16(coefficients[BME68X_IDX_H2_LSB]>>4)
 	bme68x.calibData.par_h3 = int8(coefficients[BME68X_IDX_H3])
 	bme68x.calibData.par_h4 = int8(coefficients[BME68X_IDX_H4])
 	bme68x.calibData.par_h5 = int8(coefficients[BME68X_IDX_H5])
