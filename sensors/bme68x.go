@@ -394,25 +394,25 @@ func (bme68x *BME68X) getCalibrationData() error {
 	}
 
 	/* Temperature related coefficients */
-	bme68x.calibData.par_t1 = binary.BigEndian.Uint16([]byte{coefficients[BME68X_IDX_T1_MSB], coefficients[BME68X_IDX_T1_LSB]})
-	bme68x.calibData.par_t2 = int16(binary.BigEndian.Uint16([]byte{coefficients[BME68X_IDX_T2_MSB], coefficients[BME68X_IDX_T2_LSB]}))
+	bme68x.calibData.par_t1 = uint16(coefficients[BME68X_IDX_T1_MSB])<<8 | uint16(coefficients[BME68X_IDX_T1_LSB])
+	bme68x.calibData.par_t2 = int16(uint16(coefficients[BME68X_IDX_T2_MSB])<<8 | uint16(coefficients[BME68X_IDX_T2_LSB]))
 	bme68x.calibData.par_t3 = int8(coefficients[BME68X_IDX_T3])
 
 	/* Pressure related coefficients */
-	bme68x.calibData.par_p1 = binary.BigEndian.Uint16([]byte{coefficients[BME68X_IDX_P1_MSB], coefficients[BME68X_IDX_P1_LSB]})
-	bme68x.calibData.par_p2 = int16(binary.BigEndian.Uint16([]byte{coefficients[BME68X_IDX_P2_MSB], coefficients[BME68X_IDX_P2_LSB]}))
+	bme68x.calibData.par_p1 = uint16(coefficients[BME68X_IDX_P1_MSB])<<8 | uint16(coefficients[BME68X_IDX_P1_LSB])
+	bme68x.calibData.par_p2 = int16(uint16(coefficients[BME68X_IDX_P2_MSB])<<8 | uint16(coefficients[BME68X_IDX_P2_LSB]))
 	bme68x.calibData.par_p3 = int8(coefficients[BME68X_IDX_P3])
-	bme68x.calibData.par_p4 = int16(binary.BigEndian.Uint16([]byte{coefficients[BME68X_IDX_P4_MSB], coefficients[BME68X_IDX_P4_LSB]}))
-	bme68x.calibData.par_p5 = int16(binary.BigEndian.Uint16([]byte{coefficients[BME68X_IDX_P5_MSB], coefficients[BME68X_IDX_P5_LSB]}))
+	bme68x.calibData.par_p4 = int16(uint16(coefficients[BME68X_IDX_P4_MSB])<<8 | uint16(coefficients[BME68X_IDX_P4_LSB]))
+	bme68x.calibData.par_p5 = int16(uint16(coefficients[BME68X_IDX_P5_MSB])<<8 | uint16(coefficients[BME68X_IDX_P5_LSB]))
 	bme68x.calibData.par_p6 = int8(coefficients[BME68X_IDX_P6])
 	bme68x.calibData.par_p7 = int8(coefficients[BME68X_IDX_P7])
-	bme68x.calibData.par_p8 = int16(binary.BigEndian.Uint16([]byte{coefficients[BME68X_IDX_P8_MSB], coefficients[BME68X_IDX_P8_LSB]}))
-	bme68x.calibData.par_p9 = int16(binary.BigEndian.Uint16([]byte{coefficients[BME68X_IDX_P9_MSB], coefficients[BME68X_IDX_P9_LSB]}))
+	bme68x.calibData.par_p8 = int16(uint16(coefficients[BME68X_IDX_P8_MSB])<<8 | uint16(coefficients[BME68X_IDX_P8_LSB]))
+	bme68x.calibData.par_p9 = int16(uint16(coefficients[BME68X_IDX_P9_MSB])<<8 | uint16(coefficients[BME68X_IDX_P9_LSB]))
 	bme68x.calibData.par_p10 = coefficients[BME68X_IDX_P10]
 
 	/* Humidity related coefficients */
-	bme68x.calibData.par_h1 = binary.BigEndian.Uint16([]byte{coefficients[BME68X_IDX_H1_MSB] << 4, coefficients[BME68X_IDX_H1_LSB] & BME68X_BIT_H1_DATA_MSK})
-	bme68x.calibData.par_h2 = binary.BigEndian.Uint16([]byte{coefficients[BME68X_IDX_H2_MSB] << 4, coefficients[BME68X_IDX_H2_LSB] >> 4})
+	bme68x.calibData.par_h1 = uint16(coefficients[BME68X_IDX_H1_MSB]) << 4 | (coefficients[BME68X_IDX_H1_LSB] & BME68X_BIT_H1_DATA_MSK))
+	bme68x.calibData.par_h2 = uint16(oefficients[BME68X_IDX_H2_MSB]) << 4 | (coefficients[BME68X_IDX_H2_LSB] >> 4)
 	bme68x.calibData.par_h3 = int8(coefficients[BME68X_IDX_H3])
 	bme68x.calibData.par_h4 = int8(coefficients[BME68X_IDX_H4])
 	bme68x.calibData.par_h5 = int8(coefficients[BME68X_IDX_H5])
@@ -421,7 +421,7 @@ func (bme68x *BME68X) getCalibrationData() error {
 
 	/* Gas heater related coefficients */
 	bme68x.calibData.par_gh1 = int8(coefficients[BME68X_IDX_GH1])
-	bme68x.calibData.par_gh2 = int16(binary.BigEndian.Uint16([]byte{coefficients[BME68X_IDX_GH2_MSB], coefficients[BME68X_IDX_GH2_LSB]}))
+	bme68x.calibData.par_gh2 = int16(uint16(coefficients[BME68X_IDX_GH2_MSB])<<8 | uint16(coefficients[BME68X_IDX_GH2_LSB]))
 	bme68x.calibData.par_gh3 = int8(coefficients[BME68X_IDX_GH3])
 
 	/* Other coefficients */
@@ -430,6 +430,10 @@ func (bme68x *BME68X) getCalibrationData() error {
 	bme68x.calibData.range_sw_err = int8(coefficients[BME68X_IDX_RANGE_SW_ERR]&BME68X_RSERROR_MSK) / 16
 
 	return nil
+}
+
+func bytesToWord(msb, lsb uint8) uint16 {
+	return uint16(msb)<<8 | uint16(lsb)
 }
 
 func (bme68x *BME68X) getOperatingMode() error {
