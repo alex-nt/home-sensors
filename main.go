@@ -24,6 +24,8 @@ const (
 
 func recordMetrics(bme68x *sensors.BME68X) {
 	go func() {
+		log.InfoLog.Println("Collecting sensor data")
+
 		for {
 			// temperatureGauge.WithLabelValues("scd41").Set(scd4x.GetTemperature())
 			// humidityGauge.WithLabelValues("scd41").Set(scd4x.GetRelativeHumidity())

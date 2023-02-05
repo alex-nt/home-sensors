@@ -636,6 +636,8 @@ func (bme68x *BME68X) GetSensorData() {
 		bme68x.Data.Humidity = float32(bme68x.humidity) / 1000.0
 		bme68x.Data.Pressure = float32(bme68x.pressure) / 100.0
 		bme68x.Data.GasResistance = float32(bme68x.gasResistance)
+
+		log.InfoLog.Printf("%v - metrics", bme68x.Data)
 	}
 }
 
