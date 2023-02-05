@@ -549,12 +549,12 @@ func (bme68x *BME68X) getGasStatus() (uint8, error) {
 }
 
 func (bme680 *BME68X) setPowerMode(mode uint8) error {
-	bme680.status = mode
 	if err := bme680.setBits(BME68X_REG_CTRL_MEAS, BME68X_MODE_MSK, 0, mode); err != nil {
 		return err
 	}
 
 	for {
+		log.InfoLog.Printf("Desired %b actual %b", mode, bme680.status)
 		err := bme680.getPowerMode()
 		if err != nil {
 			return err
