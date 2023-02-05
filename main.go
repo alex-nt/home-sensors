@@ -22,30 +22,30 @@ const (
 	Label_Particle_Size = "particleSize"
 )
 
-func recordMetrics(bme68x *sensors.BME68X) {
+func recordMetrics(bme68x *sensors.BME68X, scd4x *sensors.SCD4X, pmsa003i *sensors.PMSA003I) {
 	go func() {
 		log.InfoLog.Println("Collecting sensor data")
 
 		for {
-			// temperatureGauge.WithLabelValues("scd41").Set(scd4x.GetTemperature())
-			// humidityGauge.WithLabelValues("scd41").Set(scd4x.GetRelativeHumidity())
-			// co2Gauge.WithLabelValues("scd41").Set(float64(scd4x.GetCO2()))
+			temperatureGauge.WithLabelValues("scd41").Set(scd4x.GetTemperature())
+			humidityGauge.WithLabelValues("scd41").Set(scd4x.GetRelativeHumidity())
+			co2Gauge.WithLabelValues("scd41").Set(float64(scd4x.GetCO2()))
 
-			// PMSA003I.Read()
-			// pmStandardGauge.WithLabelValues("pmsa003i", "10pm").Set(float64(PMSA003I.PM10Standard))
-			// pmStandardGauge.WithLabelValues("pmsa003i", "25pm").Set(float64(PMSA003I.PM25Standard))
-			// pmStandardGauge.WithLabelValues("pmsa003i", "100pm").Set(float64(PMSA003I.PM100Standard))
+			pmsa003i.Read()
+			pmStandardGauge.WithLabelValues("pmsa003i", "10pm").Set(float64(pmsa003i.PM10Standard))
+			pmStandardGauge.WithLabelValues("pmsa003i", "25pm").Set(float64(pmsa003i.PM25Standard))
+			pmStandardGauge.WithLabelValues("pmsa003i", "100pm").Set(float64(pmsa003i.PM100Standard))
 
-			// pmEnvGauge.WithLabelValues("pmsa003i", "10pm").Set(float64(PMSA003I.PM10Env))
-			// pmEnvGauge.WithLabelValues("pmsa003i", "25pm").Set(float64(PMSA003I.PM25Env))
-			// pmEnvGauge.WithLabelValues("pmsa003i", "100pm").Set(float64(PMSA003I.PM100Env))
+			pmEnvGauge.WithLabelValues("pmsa003i", "10pm").Set(float64(pmsa003i.PM10Env))
+			pmEnvGauge.WithLabelValues("pmsa003i", "25pm").Set(float64(pmsa003i.PM25Env))
+			pmEnvGauge.WithLabelValues("pmsa003i", "100pm").Set(float64(pmsa003i.PM100Env))
 
-			// particlesCountGauge.WithLabelValues("pmsa003i", "03um").Set(float64(PMSA003I.Particles03um))
-			// particlesCountGauge.WithLabelValues("pmsa003i", "05pm").Set(float64(PMSA003I.Particles05um))
-			// particlesCountGauge.WithLabelValues("pmsa003i", "10pm").Set(float64(PMSA003I.Particles10um))
-			// particlesCountGauge.WithLabelValues("pmsa003i", "25pm").Set(float64(PMSA003I.Particles25um))
-			// particlesCountGauge.WithLabelValues("pmsa003i", "50pm").Set(float64(PMSA003I.Particles50um))
-			// particlesCountGauge.WithLabelValues("pmsa003i", "100pm").Set(float64(PMSA003I.Particles100um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "03um").Set(float64(pmsa003i.Particles03um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "05pm").Set(float64(pmsa003i.Particles05um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "10pm").Set(float64(pmsa003i.Particles10um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "25pm").Set(float64(pmsa003i.Particles25um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "50pm").Set(float64(pmsa003i.Particles50um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "100pm").Set(float64(pmsa003i.Particles100um))
 
 			bme68x.GetSensorData()
 			temperatureGauge.WithLabelValues("bme68x").Set(float64(bme68x.Data.Temperature))
@@ -116,16 +116,15 @@ func main() {
 	}
 	defer b.Close()
 
-	// Dev is a valid conn.Conn.
-	// co2Sensor := sensors.NewSCD4X(&i2c.Dev{Addr: 0x62, Bus: b})
-	// co2Sensor.StartPeriodicMeasurement()
+	co2Sensor := sensors.NewSCD4X(&i2c.Dev{Addr: 0x62, Bus: b})
+	co2Sensor.StartPeriodicMeasurement()
 
-	// PMSA003ISensor := sensors.NewPMSA003I(&i2c.Dev{Addr: 0x12, Bus: b})
+	pmsa003iSensor := sensors.NewPMSA003I(&i2c.Dev{Addr: 0x12, Bus: b})
 
 	bme68x := sensors.NewBME68X(&i2c.Dev{Addr: 0x76, Bus: b})
 	bme68x.Init()
 
-	recordMetrics(&bme68x)
+	recordMetrics(&bme68x, &co2Sensor, &pmsa003iSensor)
 
 	log.InfoLog.Printf("Started sensor collection service at %s \n", *listenAddress)
 	http.Handle("/metrics", promhttp.Handler())
