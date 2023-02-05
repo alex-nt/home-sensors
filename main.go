@@ -53,7 +53,7 @@ func recordMetrics(bme68x *sensors.BME68X) {
 			pressureGauge.WithLabelValues("bme68x").Set(float64(bme68x.Data.Pressure))
 			gasResistanceGauge.WithLabelValues("bme68x").Set(float64(bme68x.Data.GasResistance))
 			iaqGauge.WithLabelValues("bme68x").Set(float64(bme68x.Data.IAQ))
-			time.Sleep(10 * time.Second)
+			time.Sleep(5 * time.Second)
 		}
 	}()
 }
