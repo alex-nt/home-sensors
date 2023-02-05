@@ -648,8 +648,9 @@ func (bme68x *BME68X) GetSensorData() {
 		bme68x.Data.GasResistance = float32(bme68x.gasResistance)
 
 		log.InfoLog.Printf("%v - metrics", bme68x.Data)
+		log.InfoLog.Printf("%v %v %v %v %v- metrics", bme68x.temperature, bme68x.humidity, bme68x.pressure, bme68x.gasResistance, bme68x.burnInGasData)
 	}
-}
+}q
 
 func sumFLOAT32(array []float32) float32 {
 	var result float32
