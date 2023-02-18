@@ -41,11 +41,11 @@ func recordMetrics(bme68x *sensors.BME68X, scd4x *sensors.SCD4X, pmsa003i *senso
 			pmEnvGauge.WithLabelValues("pmsa003i", "100pm").Set(float64(pmsa003i.PM100Env))
 
 			particlesCountGauge.WithLabelValues("pmsa003i", "03um").Set(float64(pmsa003i.Particles03um))
-			particlesCountGauge.WithLabelValues("pmsa003i", "05pm").Set(float64(pmsa003i.Particles05um))
-			particlesCountGauge.WithLabelValues("pmsa003i", "10pm").Set(float64(pmsa003i.Particles10um))
-			particlesCountGauge.WithLabelValues("pmsa003i", "25pm").Set(float64(pmsa003i.Particles25um))
-			particlesCountGauge.WithLabelValues("pmsa003i", "50pm").Set(float64(pmsa003i.Particles50um))
-			particlesCountGauge.WithLabelValues("pmsa003i", "100pm").Set(float64(pmsa003i.Particles100um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "05um").Set(float64(pmsa003i.Particles05um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "10um").Set(float64(pmsa003i.Particles10um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "25um").Set(float64(pmsa003i.Particles25um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "50um").Set(float64(pmsa003i.Particles50um))
+			particlesCountGauge.WithLabelValues("pmsa003i", "100um").Set(float64(pmsa003i.Particles100um))
 
 			bme68x.GetSensorData()
 			temperatureGauge.WithLabelValues("bme68x").Set(float64(bme68x.Data.Temperature))
