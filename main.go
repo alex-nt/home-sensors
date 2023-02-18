@@ -20,6 +20,7 @@ import (
 const (
 	Label_Sensor        = "sensor"
 	Label_Particle_Size = "particleSize"
+	Label_Particle_Concentration = "particleConcentration"
 )
 
 func recordMetrics(bme68x *sensors.BME68X, scd4x *sensors.SCD4X, pmsa003i *sensors.PMSA003I) {
@@ -62,11 +63,11 @@ var (
 	pmStandardGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_air_quality_pm_concentration_standard",
 		Help: "Air quality. PM concentration in standard units",
-	}, []string{Label_Sensor, Label_Particle_Size})
+	}, []string{Label_Sensor, Label_Particle_Concentration})
 	pmEnvGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_air_quality_pm_concentration_env",
 		Help: "Air quality. PM concentration in environmental units",
-	}, []string{Label_Sensor, Label_Particle_Size})
+	}, []string{Label_Sensor, Label_Particle_Concentration})
 	particlesCountGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_air_quality_particles_count",
 		Help: "Air quality. Particulate matter per 0.1L air.",
