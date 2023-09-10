@@ -134,7 +134,7 @@
                     SupplementaryGroups = [ "i2c" ];
                   } // lib.optionalAttrs cfg.settings.exporters.sqlite.enable {
                     StateDirectory = dirOf cfg.settings.exporters.sqlite.db;
-                    StateDirectoryMode = 0666;
+                    WorkingDirectory = dirOf cfg.settings.exporters.sqlite.db;
                   };
               };
             };
