@@ -3,6 +3,9 @@ package sqlite
 import (
 	"database/sql"
 	_ "embed"
+	"io/fs"
+	"os"
+	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -19,6 +22,15 @@ type SqliteExporter struct {
 }
 
 func CreateExporter(path string) exporters.Exporter {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.MkdirAll(filepath.Dir(path), fs.FileMode(os.O_RDWR))
+		file, err := os.Create(path)
+		if err != nil {
+			log.ErrorLog.Fatalf("Failed to create database file: %q", err)
+		}
+		file.Close()
+	}
+
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		log.ErrorLog.Fatalf("Unable to open file %q\n", err)
