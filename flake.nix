@@ -133,7 +133,7 @@
                     DynamicUser = "yes";
                     SupplementaryGroups = [ "i2c" ];
                   } // lib.optionalAttrs cfg.settings.exporters.sqlite.enable {
-                    StateDirectory = dirOf cfg.settings.exporters.sqlite.path;
+                    StateDirectory = dirOf cfg.settings.exporters.sqlite.db;
                   };
               };
             };
