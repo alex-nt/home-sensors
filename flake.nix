@@ -109,7 +109,7 @@
                     enable = mkEnableOption "Enable sqlite exporter";
                     db = lib.mkOption {
                       type = types.str;
-                      default = "~/services/go-home-sensors/metrics.db";
+                      default = "/var/lib/go-home-sensors/metrics.db";
                       description = ''
                         database connection string.
                       '';
@@ -132,6 +132,8 @@
                     ExecStart = "${pkg}/bin/go-home-sensors --config.file=${configFilePath}";
                     DynamicUser = "yes";
                     SupplementaryGroups = [ "i2c" ];
+                  } // lib.optionalAttrs cfg.settings.exporters.sqlite.enable {
+                    StateDirectory = dirOf cfg.settings.exporters.sqlite.path;
                   };
               };
             };
