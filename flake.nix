@@ -102,17 +102,18 @@
                     scd4x = 98; #0x62
                     pmsa003i = 18; #0x12
                   };
-              };
-              exporters = {
-                prometheus.enable = mkEnableOption "Enable prometheus exporter";
-                sqlite = {
-                  enable = mkEnableOption "Enable sqlite exporter";
-                  db = lib.mkOption {
-                    type = types.str;
-                    default = "/var/lib/${pname}/metrics.db";
-                    description = ''
-                      database connection string.
-                    '';
+
+                exporters = {
+                  prometheus.enable = mkEnableOption "Enable prometheus exporter";
+                  sqlite = {
+                    enable = mkEnableOption "Enable sqlite exporter";
+                    db = lib.mkOption {
+                      type = types.str;
+                      default = "/var/lib/${pname}/metrics.db";
+                      description = ''
+                        database connection string.
+                      '';
+                    };
                   };
                 };
               };
