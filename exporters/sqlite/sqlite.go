@@ -49,7 +49,7 @@ func CreateExporter(path string) exporters.Exporter {
 	if err != nil {
 		log.ErrorLog.Fatal(err)
 	}
-	stmt, err := tx.Prepare("INSERT INTO measurement(id, description, unit) VALUES(?, ?, ?)")
+	stmt, err := tx.Prepare("INSERT OR REPLACE INTO measurement(id, description, unit) VALUES(?, ?, ?)")
 	if err != nil {
 		log.ErrorLog.Fatal(err)
 	}
