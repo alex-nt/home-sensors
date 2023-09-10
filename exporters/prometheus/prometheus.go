@@ -11,52 +11,46 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-const (
-	Label_Sensor                 = "sensor"
-	Label_Particle_Size          = "particleSize"
-	Label_Particle_Concentration = "particleConcentration"
-)
-
 var (
 	pmStandardGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_air_quality_pm_concentration_standard",
 		Help: "Air quality. PM concentration in standard units",
-	}, []string{})
+	}, []string{string(sensors.ParticleConcentration), string(sensors.SensorName)})
 	pmEnvGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_air_quality_pm_concentration_env",
 		Help: "Air quality. PM concentration in environmental units",
-	}, []string{})
+	}, []string{string(sensors.ParticleConcentration), string(sensors.SensorName)})
 	particlesCountGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_air_quality_particles_count",
 		Help: "Air quality. Particulate matter per 0.1L air.",
-	}, []string{})
+	}, []string{string(sensors.ParticleSize), string(sensors.SensorName)})
 )
 
 var (
 	temperatureGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_temperature",
 		Help: "Ambient temperature in C",
-	}, []string{})
+	}, []string{string(sensors.SensorName)})
 	humidityGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_humidity",
 		Help: "Ambient relative humidity",
-	}, []string{})
+	}, []string{string(sensors.SensorName)})
 	co2Gauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_co2",
 		Help: "CO2 in ppm",
-	}, []string{})
+	}, []string{string(sensors.SensorName)})
 	pressureGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_pressure",
 		Help: "Pressure Hpa",
-	}, []string{})
+	}, []string{string(sensors.SensorName)})
 	gasResistanceGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_gasResistance",
 		Help: "Gas resistance in Ohm",
-	}, []string{})
+	}, []string{string(sensors.SensorName)})
 	iaqGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_iaq",
 		Help: "Indoor Air Quality",
-	}, []string{})
+	}, []string{string(sensors.SensorName)})
 )
 
 var measurementToGauge = map[sensors.Measurement]*prometheus.GaugeVec{
@@ -89,9 +83,9 @@ func (pe *PrometheusExporter) Export(recordings []sensors.MeasurementRecording) 
 		}
 
 		extendedLabels := make(map[string]string, len(metricRecording.Metadata)+1)
-		extendedLabels[Label_Sensor] = metricRecording.Sensor
+		extendedLabels[string(sensors.SensorName)] = metricRecording.Sensor
 		for k, v := range metricRecording.Metadata {
-			extendedLabels[k] = v
+			extendedLabels[string(k)] = v
 		}
 		gauge.With(extendedLabels).Add(metricRecording.Value)
 	}

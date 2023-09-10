@@ -14,6 +14,14 @@ const (
 	MicrogramsPerCubicMetre Unit = "MicrogramsPerCubicMetre" // µg/m³
 )
 
+type Metadata string
+
+const (
+	SensorName            Metadata = "sensor"
+	ParticleSize          Metadata = "particleSize"
+	ParticleConcentration Metadata = "particleConcentration"
+)
+
 type Measurement struct {
 	ID          string
 	Description string
@@ -75,5 +83,5 @@ type MeasurementRecording struct {
 	Measure  *Measurement
 	Value    float64
 	Sensor   string
-	Metadata map[string]string
+	Metadata map[Metadata]string
 }

@@ -49,73 +49,73 @@ func (pmsa *PMSA003I) Collect() []sensors.MeasurementRecording {
 		Measure:  &sensors.ParticleMatterStandard,
 		Value:    float64(pmsa.PM1Standard),
 		Sensor:   pmsa.Name(),
-		Metadata: map[string]string{"particleConcentration": "1.0pm"},
+		Metadata: map[sensors.Metadata]string{sensors.ParticleConcentration: "1.0pm"},
 	})
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure:  &sensors.ParticleMatterStandard,
 		Value:    float64(pmsa.PM2_5Standard),
 		Sensor:   pmsa.Name(),
-		Metadata: map[string]string{"particleConcentration": "2.5pm"},
+		Metadata: map[sensors.Metadata]string{sensors.ParticleConcentration: "2.5pm"},
 	})
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure:  &sensors.ParticleMatterStandard,
 		Value:    float64(pmsa.PM10Standard),
 		Sensor:   pmsa.Name(),
-		Metadata: map[string]string{"particleConcentration": "10pm"},
+		Metadata: map[sensors.Metadata]string{sensors.ParticleConcentration: "10pm"},
 	})
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure:  &sensors.ParticleMatterEnvironmental,
 		Value:    float64(pmsa.PM1Env),
 		Sensor:   pmsa.Name(),
-		Metadata: map[string]string{"particleConcentration": "1.0pm"},
+		Metadata: map[sensors.Metadata]string{sensors.ParticleConcentration: "1.0pm"},
 	})
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure:  &sensors.ParticleMatterEnvironmental,
 		Value:    float64(pmsa.PM2_5Env),
 		Sensor:   pmsa.Name(),
-		Metadata: map[string]string{"particleConcentration": "2.5pm"},
+		Metadata: map[sensors.Metadata]string{sensors.ParticleConcentration: "2.5pm"},
 	})
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure:  &sensors.ParticleMatterEnvironmental,
 		Value:    float64(pmsa.PM10Env),
 		Sensor:   pmsa.Name(),
-		Metadata: map[string]string{"particleConcentration": "10pm"},
+		Metadata: map[sensors.Metadata]string{sensors.ParticleConcentration: "10pm"},
 	})
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure:  &sensors.ParticleCount,
 		Value:    float64(pmsa.Particles0_3um),
 		Sensor:   pmsa.Name(),
-		Metadata: map[string]string{"particleSize": "0.3um"},
+		Metadata: map[sensors.Metadata]string{sensors.ParticleSize: "0.3um"},
 	})
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure:  &sensors.ParticleCount,
 		Value:    float64(pmsa.Particles0_5um),
 		Sensor:   pmsa.Name(),
-		Metadata: map[string]string{"particleSize": "0.5um"},
+		Metadata: map[sensors.Metadata]string{sensors.ParticleSize: "0.5um"},
 	})
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure:  &sensors.ParticleCount,
 		Value:    float64(pmsa.Particles1um),
 		Sensor:   pmsa.Name(),
-		Metadata: map[string]string{"particleSize": "1um"},
+		Metadata: map[sensors.Metadata]string{sensors.ParticleSize: "1um"},
 	})
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure:  &sensors.ParticleCount,
 		Value:    float64(pmsa.Particles2_5um),
 		Sensor:   pmsa.Name(),
-		Metadata: map[string]string{"particleSize": "2.5um"},
+		Metadata: map[sensors.Metadata]string{sensors.ParticleSize: "2.5um"},
 	})
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure:  &sensors.ParticleCount,
 		Value:    float64(pmsa.Particles5um),
 		Sensor:   pmsa.Name(),
-		Metadata: map[string]string{"particleSize": "5.0um"},
+		Metadata: map[sensors.Metadata]string{sensors.ParticleSize: "5.0um"},
 	})
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure:  &sensors.ParticleCount,
 		Value:    float64(pmsa.Particles10um),
 		Sensor:   pmsa.Name(),
-		Metadata: map[string]string{"particleSize": "10um"},
+		Metadata: map[sensors.Metadata]string{sensors.ParticleSize: "10um"},
 	})
 	return measurements
 }
