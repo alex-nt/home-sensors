@@ -1,14 +1,16 @@
-package sensors
+package sensirion
 
 import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
 	"math"
+	"strings"
 	"sync"
 	"time"
 
 	"azuremyst.org/go-home-sensors/log"
+	"azuremyst.org/go-home-sensors/sensors"
 	"periph.io/x/conn/v3/i2c"
 )
 
@@ -51,8 +53,41 @@ type SCD4X struct {
 	CO2              uint16
 }
 
-func NewSCD4X(device *i2c.Dev) SCD4X {
-	return SCD4X{device: device}
+func init() {
+	sensors.RegisterSensor(&SCD4X{})
+}
+
+func (scd4x *SCD4X) Initialize(bus i2c.Bus, addr uint16) {
+	scd4x.device = &i2c.Dev{Addr: addr, Bus: bus}
+	scd4x.StartPeriodicMeasurement()
+}
+
+func (scd4x *SCD4X) Name() string {
+	return "scd4x"
+}
+
+func (scd4x *SCD4X) Family(name string) bool {
+	return len(name) == 5 && strings.HasPrefix(strings.ToLower(name), "scd4")
+}
+
+func (scd4x *SCD4X) Collect() []sensors.MeasurementRecording {
+	measurements := make([]sensors.MeasurementRecording, 12)
+	measurements = append(measurements, sensors.MeasurementRecording{
+		Measure: &sensors.Temperature,
+		Value:   float64(scd4x.GetTemperature()),
+		Sensor:  scd4x.Name(),
+	})
+	measurements = append(measurements, sensors.MeasurementRecording{
+		Measure: &sensors.Humidity,
+		Value:   float64(scd4x.GetRelativeHumidity()),
+		Sensor:  scd4x.Name(),
+	})
+	measurements = append(measurements, sensors.MeasurementRecording{
+		Measure: &sensors.CarbonDioxide,
+		Value:   float64(scd4x.GetCO2()),
+		Sensor:  scd4x.Name(),
+	})
+	return measurements
 }
 
 func (scd4x *SCD4X) ReadCommand(command *Command) ([]byte, error) {

@@ -2,108 +2,91 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"net/http"
+	"os"
 	"time"
 
+	"azuremyst.org/go-home-sensors/exporters"
+	"azuremyst.org/go-home-sensors/exporters/prometheus"
+	"azuremyst.org/go-home-sensors/exporters/sqlite"
 	"azuremyst.org/go-home-sensors/log"
 	"azuremyst.org/go-home-sensors/sensors"
 
-	"periph.io/x/conn/v3/i2c"
+	"github.com/BurntSushi/toml"
 	"periph.io/x/conn/v3/i2c/i2creg"
 	"periph.io/x/host/v3"
-
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-const (
-	Label_Sensor        = "sensor"
-	Label_Particle_Size = "particleSize"
-	Label_Particle_Concentration = "particleConcentration"
-)
-
-func recordMetrics(bme68x *sensors.BME68X, scd4x *sensors.SCD4X, pmsa003i *sensors.PMSA003I) {
+func recordMetrics(interval time.Duration, sens []sensors.Sensor, exps []exporters.Exporter) {
 	go func() {
 		log.InfoLog.Println("Collecting sensor data")
 
 		for {
-			temperatureGauge.WithLabelValues("scd41").Set(scd4x.GetTemperature())
-			humidityGauge.WithLabelValues("scd41").Set(scd4x.GetRelativeHumidity())
-			co2Gauge.WithLabelValues("scd41").Set(float64(scd4x.GetCO2()))
+			collectedMeasurements := make([]sensors.MeasurementRecording, 0)
+			for _, sen := range sens {
+				collectedMeasurements = append(collectedMeasurements, sen.Collect()...)
+			}
 
-			pmsa003i.Read()
-			pmStandardGauge.WithLabelValues("pmsa003i", "10pm").Set(float64(pmsa003i.PM10Standard))
-			pmStandardGauge.WithLabelValues("pmsa003i", "25pm").Set(float64(pmsa003i.PM25Standard))
-			pmStandardGauge.WithLabelValues("pmsa003i", "100pm").Set(float64(pmsa003i.PM100Standard))
-
-			pmEnvGauge.WithLabelValues("pmsa003i", "10pm").Set(float64(pmsa003i.PM10Env))
-			pmEnvGauge.WithLabelValues("pmsa003i", "25pm").Set(float64(pmsa003i.PM25Env))
-			pmEnvGauge.WithLabelValues("pmsa003i", "100pm").Set(float64(pmsa003i.PM100Env))
-
-			particlesCountGauge.WithLabelValues("pmsa003i", "03um").Set(float64(pmsa003i.Particles03um))
-			particlesCountGauge.WithLabelValues("pmsa003i", "05um").Set(float64(pmsa003i.Particles05um))
-			particlesCountGauge.WithLabelValues("pmsa003i", "10um").Set(float64(pmsa003i.Particles10um))
-			particlesCountGauge.WithLabelValues("pmsa003i", "25um").Set(float64(pmsa003i.Particles25um))
-			particlesCountGauge.WithLabelValues("pmsa003i", "50um").Set(float64(pmsa003i.Particles50um))
-			particlesCountGauge.WithLabelValues("pmsa003i", "100um").Set(float64(pmsa003i.Particles100um))
-
-			bme68x.GetSensorData()
-			temperatureGauge.WithLabelValues("bme68x").Set(float64(bme68x.Data.Temperature))
-			humidityGauge.WithLabelValues("bme68x").Set(float64(bme68x.Data.Humidity))
-			pressureGauge.WithLabelValues("bme68x").Set(float64(bme68x.Data.Pressure))
-			gasResistanceGauge.WithLabelValues("bme68x").Set(float64(bme68x.Data.GasResistance))
-			iaqGauge.WithLabelValues("bme68x").Set(float64(bme68x.Data.IAQ))
-			time.Sleep(5 * time.Second)
+			for _, exp := range exps {
+				exp.Export(collectedMeasurements)
+			}
+			time.Sleep(interval)
 		}
 	}()
 }
 
-var (
-	pmStandardGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_air_quality_pm_concentration_standard",
-		Help: "Air quality. PM concentration in standard units",
-	}, []string{Label_Sensor, Label_Particle_Concentration})
-	pmEnvGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_air_quality_pm_concentration_env",
-		Help: "Air quality. PM concentration in environmental units",
-	}, []string{Label_Sensor, Label_Particle_Concentration})
-	particlesCountGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_air_quality_particles_count",
-		Help: "Air quality. Particulate matter per 0.1L air.",
-	}, []string{Label_Sensor, Label_Particle_Size})
-)
+func initializeExporters(conf Config) []exporters.Exporter {
+	initializeExporters := make([]exporters.Exporter, 0)
+	if conf.Exporters.Prometheus.Enabled {
+		initializeExporters = append(initializeExporters, prometheus.CreateExporter())
+	}
 
-var (
-	temperatureGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_temperature",
-		Help: "Ambient temperature in C",
-	}, []string{Label_Sensor})
-	humidityGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_humidity",
-		Help: "Ambient relative humidity",
-	}, []string{Label_Sensor})
-	co2Gauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_co2",
-		Help: "CO2 in ppm",
-	}, []string{Label_Sensor})
-	pressureGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_pressure",
-		Help: "Pressure Hpa",
-	}, []string{Label_Sensor})
-	gasResistanceGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_gasResistance",
-		Help: "Gas resistance in Ohm",
-	}, []string{Label_Sensor})
-	iaqGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_iaq",
-		Help: "Indoor Air Quality",
-	}, []string{Label_Sensor})
+	if conf.Exporters.Sqlite.Enabled {
+		initializeExporters = append(initializeExporters, sqlite.CreateExporter(conf.Exporters.Sqlite.DB))
+	}
+
+	return initializeExporters
+}
+
+type (
+	Config struct {
+		Sensors   map[string]SensorConfig
+		Exporters MetricExporters
+		Port      int
+		Frequency time.Duration
+	}
+
+	SensorConfig struct {
+		Enabled  bool
+		Register uint16
+	}
+
+	sqliteExporter struct {
+		Enabled bool
+		DB      string
+	}
+
+	prometheusExporter struct {
+		Enabled bool
+	}
+
+	MetricExporters struct {
+		Prometheus prometheusExporter
+		Sqlite     sqliteExporter
+	}
 )
 
 func main() {
-	listenAddress := flag.String("web.listen-address", ":2112", "Define the address and port at which to listen")
+	configLocation := flag.String("--config.file", "config.toml", "Configuration in toml format")
 	flag.Parse()
+
+	var conf Config
+	_, err := toml.DecodeFile(*configLocation, &conf)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Please provide a valid config file via `--config.file` parameter. Unable to read: %v\n", err)
+		os.Exit(1)
+	}
 
 	// Make sure periph is initialized.
 	if _, err := host.Init(); err != nil {
@@ -117,17 +100,35 @@ func main() {
 	}
 	defer b.Close()
 
-	co2Sensor := sensors.NewSCD4X(&i2c.Dev{Addr: 0x62, Bus: b})
-	co2Sensor.StartPeriodicMeasurement()
+	log.InfoLog.Println("Supported sensors:")
+	supported := sensors.Supported()
+	for _, s := range supported {
+		log.InfoLog.Printf("\t%s\n", s)
+	}
 
-	pmsa003iSensor := sensors.NewPMSA003I(&i2c.Dev{Addr: 0x12, Bus: b})
+	initializedExporters := initializeExporters(conf)
+	if len(initializedExporters) == 0 {
+		log.ErrorLog.Panicln("No exporter was configured!")
+	}
 
-	bme68x := sensors.NewBME68X(&i2c.Dev{Addr: 0x76, Bus: b})
-	bme68x.Init()
+	initializedSensors := make([]sensors.Sensor, 0)
+	for senName, senConfig := range conf.Sensors {
+		if !senConfig.Enabled {
+			log.InfoLog.Printf("Sensor %s is disabled.\n", senName)
+			continue
+		}
+		sensorInstance := sensors.Sniff(senName)
+		if nil == sensorInstance {
+			log.ErrorLog.Println("Sensor " + senName + " not supported!")
+		} else {
+			sensor := *sensorInstance
+			sensor.Initialize(b, senConfig.Register)
+			initializedSensors = append(initializedSensors, sensor)
+		}
+	}
 
-	recordMetrics(&bme68x, &co2Sensor, &pmsa003iSensor)
+	recordMetrics(conf.Frequency, initializedSensors, initializedExporters)
 
-	log.InfoLog.Printf("Started sensor collection service at %s \n", *listenAddress)
-	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(*listenAddress, nil)
+	log.InfoLog.Printf("Started sensor collection service at %d \n", conf.Port)
+	http.ListenAndServe(fmt.Sprintf(":%d", conf.Port), nil)
 }

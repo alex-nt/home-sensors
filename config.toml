@@ -1,0 +1,21 @@
+frequency = "15s"
+port = 2112
+
+[exporters.prometheus]
+    enabled = true
+
+[exporters.sqlite]
+    enabled = true
+    db = "./export.db"
+
+[sensors.bme68x]
+    register = 0x76
+    enabled = true
+
+[sensors.scd4x]
+    register = 0x62
+    enabled = true
+
+[sensors.pmsa003i]
+    register = 0x12
+    enabled = true
