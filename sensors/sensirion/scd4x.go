@@ -74,12 +74,12 @@ func (scd4x *SCD4X) Collect() []sensors.MeasurementRecording {
 	measurements := make([]sensors.MeasurementRecording, 0)
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure: &sensors.Temperature,
-		Value:   float64(scd4x.GetTemperature()),
+		Value:   scd4x.GetTemperature(),
 		Sensor:  scd4x.Name(),
 	})
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure: &sensors.Humidity,
-		Value:   float64(scd4x.GetRelativeHumidity()),
+		Value:   scd4x.GetRelativeHumidity(),
 		Sensor:  scd4x.Name(),
 	})
 	measurements = append(measurements, sensors.MeasurementRecording{

@@ -87,6 +87,6 @@ func (pe *PrometheusExporter) Export(recordings []sensors.MeasurementRecording) 
 		for k, v := range metricRecording.Metadata {
 			extendedLabels[string(k)] = v
 		}
-		gauge.With(extendedLabels).Add(metricRecording.Value)
+		gauge.With(extendedLabels).Set(metricRecording.Value)
 	}
 }
