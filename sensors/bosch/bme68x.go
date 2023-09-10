@@ -315,7 +315,7 @@ func (bme68x *BME68X) Family(name string) bool {
 
 func (bme68x *BME68X) Collect() []sensors.MeasurementRecording {
 	bme68x.getSensorData()
-	measurements := make([]sensors.MeasurementRecording, 5)
+	measurements := make([]sensors.MeasurementRecording, 0)
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure: &sensors.Temperature,
 		Value:   float64(bme68x.Data.Temperature),

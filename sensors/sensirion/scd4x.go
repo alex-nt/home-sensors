@@ -71,7 +71,7 @@ func (scd4x *SCD4X) Family(name string) bool {
 }
 
 func (scd4x *SCD4X) Collect() []sensors.MeasurementRecording {
-	measurements := make([]sensors.MeasurementRecording, 3)
+	measurements := make([]sensors.MeasurementRecording, 0)
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure: &sensors.Temperature,
 		Value:   float64(scd4x.GetTemperature()),

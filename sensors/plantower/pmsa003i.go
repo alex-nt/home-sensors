@@ -44,7 +44,7 @@ func (pmsa *PMSA003I) Family(name string) bool {
 
 func (pmsa *PMSA003I) Collect() []sensors.MeasurementRecording {
 	pmsa.read()
-	measurements := make([]sensors.MeasurementRecording, 12)
+	measurements := make([]sensors.MeasurementRecording, 0)
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure:  &sensors.ParticleMatterStandard,
 		Value:    float64(pmsa.PM1Standard),
