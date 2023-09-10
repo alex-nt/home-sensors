@@ -13,6 +13,10 @@ import (
 	"azuremyst.org/go-home-sensors/log"
 	"azuremyst.org/go-home-sensors/sensors"
 
+	_ "azuremyst.org/go-home-sensors/sensors/bosch"
+	_ "azuremyst.org/go-home-sensors/sensors/plantower"
+	_ "azuremyst.org/go-home-sensors/sensors/sensirion"
+
 	"github.com/BurntSushi/toml"
 	"periph.io/x/conn/v3/i2c/i2creg"
 	"periph.io/x/host/v3"
@@ -38,11 +42,11 @@ func recordMetrics(interval time.Duration, sens []sensors.Sensor, exps []exporte
 
 func initializeExporters(conf Config) []exporters.Exporter {
 	initializeExporters := make([]exporters.Exporter, 0)
-	if conf.Exporters.Prometheus.Enabled {
+	if conf.Exporters.Prometheus.Enable {
 		initializeExporters = append(initializeExporters, prometheus.CreateExporter())
 	}
 
-	if conf.Exporters.Sqlite.Enabled {
+	if conf.Exporters.Sqlite.Enable {
 		initializeExporters = append(initializeExporters, sqlite.CreateExporter(conf.Exporters.Sqlite.DB))
 	}
 
@@ -58,17 +62,17 @@ type (
 	}
 
 	SensorConfig struct {
-		Enabled  bool
+		Enable   bool
 		Register uint16
 	}
 
 	sqliteExporter struct {
-		Enabled bool
-		DB      string
+		Enable bool
+		DB     string
 	}
 
 	prometheusExporter struct {
-		Enabled bool
+		Enable bool
 	}
 
 	MetricExporters struct {
@@ -113,7 +117,7 @@ func main() {
 
 	initializedSensors := make([]sensors.Sensor, 0)
 	for senName, senConfig := range conf.Sensors {
-		if !senConfig.Enabled {
+		if !senConfig.Enable {
 			log.InfoLog.Printf("Sensor %s is disabled.\n", senName)
 			continue
 		}
