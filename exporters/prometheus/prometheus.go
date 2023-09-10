@@ -21,11 +21,11 @@ var (
 	pmStandardGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_air_quality_pm_concentration_standard",
 		Help: "Air quality. PM concentration in standard units",
-	}, []string{Label_Sensor})
+	}, []string{})
 	pmEnvGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_air_quality_pm_concentration_env",
 		Help: "Air quality. PM concentration in environmental units",
-	}, []string{Label_Sensor})
+	}, []string{})
 	particlesCountGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "room_air_quality_particles_count",
 		Help: "Air quality. Particulate matter per 0.1L air.",
