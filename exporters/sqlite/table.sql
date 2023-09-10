@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS measurement_recording (
     value REAL,
     measure_id TEXT,
     FOREIGN KEY(measure_id) REFERENCES measurement(id)
-)
+);
 
 CREATE TABLE IF NOT EXISTS measurement_meta_data (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
