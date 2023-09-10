@@ -19,7 +19,7 @@ type SqliteExporter struct {
 }
 
 func CreateExporter(path string) exporters.Exporter {
-	db, err := sql.Open("sqlite3", "./foo.db")
+	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		log.ErrorLog.Fatalf("Unable to open file %q\n", err)
 	}

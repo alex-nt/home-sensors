@@ -38,13 +38,11 @@ func Sniff(family string) *Sensor {
 }
 
 func Supported() []string {
-	sensorsMu.Lock()
 	sensors, _ := atomicSensors.Load().([]Sensor)
 	supportedList := make([]string, len(sensors))
 	for _, sensor := range sensors {
 		supportedList = append(supportedList, sensor.Name())
 	}
 
-	sensorsMu.Unlock()
 	return supportedList
 }
