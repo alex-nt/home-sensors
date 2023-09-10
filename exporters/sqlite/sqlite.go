@@ -86,7 +86,7 @@ func (pe *SqliteExporter) Export(recordings []sensors.MeasurementRecording) {
 	for _, recording := range recordings {
 		res, err := stmtMeasurement.Exec(recording.Value, recording.Measure.ID)
 		if err != nil {
-			log.ErrorLog.Fatal(err)
+			log.ErrorLog.Fatalf("Failed to insert %s: %q\n", recording.Measure.ID, err)
 		}
 
 		insertId, err := res.LastInsertId()
