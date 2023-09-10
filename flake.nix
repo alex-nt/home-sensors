@@ -134,6 +134,7 @@
                     SupplementaryGroups = [ "i2c" ];
                   } // lib.optionalAttrs cfg.settings.exporters.sqlite.enable {
                     StateDirectory = dirOf cfg.settings.exporters.sqlite.db;
+                    ReadWritePaths = dirOf cfg.settings.exporters.sqlite.db;
                   };
               };
             };
