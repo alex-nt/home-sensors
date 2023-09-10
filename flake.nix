@@ -65,23 +65,56 @@
           with lib;
           let
             cfg = config.alex-nt.services.home-sensors;
+            toml = pkgs.formats.toml { };
+            configFilePath = toml.generate "sensors.toml" cfg.settings;
           in
           {
             options.alex-nt.services.home-sensors = {
-              enable = mkEnableOption "Enables the home-sensors prometheus-collector service";
-              port = lib.mkOption {
-                type = lib.types.port;
-                default = 2112;
-                description = ''
-                  Which port this service should listen on.
-                '';
+              enable = mkEnableOption "Enables the home-sensors exporter service";
+              settings = {
+                port = lib.mkOption {
+                  type = lib.types.port;
+                  default = 2112;
+                  description = ''
+                    Which port this service should listen on.
+                  '';
+                };
+                frequency = lib.mkOption {
+                  type = types.str;
+                  default = "15s";
+                  description = ''
+                    Interval at which to refresh the metrics.
+                  '';
+                };
+                sensors = builtins.mapAttrs
+                  (name: value: {
+                    enable = mkEnableOption "Enables ${s} sensor";
+                    register = lib.mkOption {
+                      type = types.number;
+                      default = value;
+                      description = ''
+                        i2c register where the sensor is located.
+                      '';
+                    };
+                  })
+                  {
+                    bme68x = 118; #0x76
+                    scd4x = 98; #0x62
+                    pmsa003i = 18; #0x12
+                  };
               };
-              listenAddress = mkOption {
-                type = types.str;
-                default = "0.0.0.0";
-                description = lib.mdDoc ''
-                  Address to listen on for the exporter.
-                '';
+              exporters = {
+                prometheus.enable = mkEnableOption "Enable prometheus exporter";
+                sqlite = {
+                  enable = mkEnableOption "Enable sqlite exporter";
+                  db = lib.mkOption {
+                    type = types.str;
+                    default = "/var/lib/${pname}/metrics.db";
+                    description = ''
+                      database connection string.
+                    '';
+                  };
+                };
               };
             };
 
@@ -95,7 +128,7 @@
                   in
                   {
                     Restart = "on-failure";
-                    ExecStart = "${pkg}/bin/go-home-sensors --web.listen-address=${cfg.listenAddress}:${builtins.toString cfg.port}";
+                    ExecStart = "${pkg}/bin/go-home-sensors --config.file=${configFilePath}";
                     DynamicUser = "yes";
                     SupplementaryGroups = [ "i2c" ];
                   };
