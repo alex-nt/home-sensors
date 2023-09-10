@@ -78,7 +78,7 @@ type (
 )
 
 func main() {
-	configLocation := flag.String("--config.file", "config.toml", "Configuration in toml format")
+	configLocation := flag.String("config.file", "config.toml", "Configuration in toml format")
 	flag.Parse()
 
 	var conf Config
