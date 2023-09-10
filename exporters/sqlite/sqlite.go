@@ -23,7 +23,11 @@ type SqliteExporter struct {
 
 func CreateExporter(path string) exporters.Exporter {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.MkdirAll(filepath.Dir(path), fs.FileMode(os.O_RDWR))
+		err := os.MkdirAll(filepath.Dir(path), fs.FileMode(os.O_RDWR))
+		if err != nil {
+			log.ErrorLog.Fatalf("Failed to create path to db file: %q", err)
+		}
+
 		file, err := os.Create(path)
 		if err != nil {
 			log.ErrorLog.Fatalf("Failed to create database file: %q", err)
