@@ -109,7 +109,7 @@
                     enable = mkEnableOption "Enable sqlite exporter";
                     db = lib.mkOption {
                       type = types.str;
-                      default = "/var/lib/${pname}/metrics.db";
+                      default = "/var/lib/go-home-sensors/metrics.db";
                       description = ''
                         database connection string.
                       '';
