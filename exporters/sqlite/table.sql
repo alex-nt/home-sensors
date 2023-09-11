@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS measurement (
 CREATE TABLE IF NOT EXISTS measurement_recording (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     value REAL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     measure_id TEXT,
     FOREIGN KEY(measure_id) REFERENCES measurement(id)
 );
