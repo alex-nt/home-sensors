@@ -101,6 +101,7 @@
                     bme68x = 118; #0x76
                     scd4x = 98; #0x62
                     pmsa003i = 18; #0x12
+                    sen5x = 105; #0x69
                   };
 
                 exporters = {

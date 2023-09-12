@@ -19,3 +19,7 @@ port = 2112
 [sensors.pmsa003i]
     register = 0x12
     enabled = true
+
+[sensors.sen5x]
+    register = 0x69
+    enabled = true
