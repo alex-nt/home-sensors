@@ -24,7 +24,7 @@ var (
 	SCD4X_STARTPERIODICMEASUREMENT         = Command{code: 0x21B1, description: "Start periodic measurement", delay: time.Duration(0 * float64(time.Second)), size: 0}
 	SCD4X_STARTLOWPOWERPERIODICMEASUREMENT = Command{code: 0x21AC, description: "Start low power periodic measurement", delay: time.Duration(0 * float64(time.Second)), size: 0}
 	SCD4X_READMEASUREMENT                  = Command{code: 0xEC05, description: "Read measurement", delay: time.Duration(0.001 * float64(time.Second)), size: 6}
-	SCD4X_SERIALNUMBER                     = Command{code: 0x3682, description: "Serial number", delay: time.Duration(0.001 * float64(time.Second)), size: 6}
+	SCD4X_SERIALNUMBER                     = Command{code: 0x3682, description: "Serial number", delay: time.Duration(0.5 * float64(time.Second)), size: 6}
 	SCD4X_GETTEMPOFFSET                    = Command{code: 0x2318, description: "Get temp offset", delay: time.Duration(0.001 * float64(time.Second)), size: 2}
 	SCD4X_SETTEMPOFFSET                    = Command{code: 0x241D, description: "Set temp offset", delay: time.Duration(0 * float64(time.Second)), size: 0}
 	SCD4X_GETALTITUDE                      = Command{code: 0x2322, description: "Get altitude", delay: time.Duration(0.001 * float64(time.Second)), size: 2}
