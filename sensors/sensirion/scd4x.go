@@ -52,7 +52,9 @@ func init() {
 
 func (scd4x *SCD4X) Initialize(bus i2c.Bus, addr uint16) {
 	scd4x.device = &i2c.Dev{Addr: addr, Bus: bus}
-	scd4x.SerialNumber()
+	if err := scd4x.SerialNumber(); err != nil {
+		log.ErrorLog.Printf("Failed to read SN: %q", err)
+	}
 	log.InfoLog.Printf(`Sensirion SCD4X
 	SerialNumber: %s`,
 		scd4x.serialNumber)
@@ -90,7 +92,7 @@ func (scd4x *SCD4X) Collect() []sensors.MeasurementRecording {
 func (scd4x *SCD4X) dataReady() bool {
 	response, err := SCD4X_DATAREADY.Read(scd4x.device, &scd4x.mu)
 	if err != nil {
-		log.ErrorLog.Printf("Data not ready %v", err)
+		log.ErrorLog.Printf("Data not ready %q", err)
 		return false
 	}
 	return !((response[0]&0x07 == 0) && (response[1] == 0))
@@ -146,7 +148,7 @@ func (scd4x *SCD4X) FactoryReset() {
 func (scd4x *SCD4X) IsCalibrationEnabled() bool {
 	response, err := SCD4X_GETASCE.Read(scd4x.device, &scd4x.mu)
 	if err != nil {
-		log.ErrorLog.Printf("Calibration status could not be read %v", err)
+		log.ErrorLog.Printf("Calibration status could not be read %q", err)
 		return false
 	}
 	return response[1] == 1
