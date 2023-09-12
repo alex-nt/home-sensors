@@ -82,13 +82,13 @@ func (sen5x *SEN5X) Initialize(bus i2c.Bus, addr uint16) {
 		return
 	}
 	log.InfoLog.Printf(`Sensirion SEN5x
-			\n\tProductName: %s
-			\n\tStatus: %d
-			\n\tFirmwareDebug: %t
-			\n\tVersions:
-			\n\t\tFirmware: %d.%d
-			\n\t\tHardware: %d.%d
-			\n\t\tProtocol: %d.%d`,
+	ProductName: %s
+	Status: %d
+	FirmwareDebug: %t
+	Versions:
+		Firmware: %d.%d
+		Hardware: %d.%d
+		Protocol: %d.%d`,
 		sen5x.productName, sen5x.status, sen5x.firmwareDebug,
 		sen5x.firmwareMajorVersion, sen5x.firmwareMinorVersion,
 		sen5x.hardwareMajorVersion, sen5x.hardwareMinorVersion,
@@ -126,10 +126,6 @@ func (sen5x *SEN5X) ProductName() error {
 }
 
 func (sen5x *SEN5X) Versions() error {
-	err := SEN5X_VERSION.Write(sen5x.device, &sen5x.mu)
-	if err != nil {
-		return fmt.Errorf("failed to write versions command: %q", err)
-	}
 	data, err := SEN5X_VERSION.Read(sen5x.device, &sen5x.mu)
 	if err != nil {
 		return fmt.Errorf("failed to read versions number: %q", err)
