@@ -57,11 +57,30 @@ func (sen5x *SEN5X) Collect() []sensors.MeasurementRecording {
 
 func (sen5x *SEN5X) Initialize(bus i2c.Bus, addr uint16) {
 	sen5x.device = &i2c.Dev{Addr: addr, Bus: bus}
-	sen5x.Reset()
-	sen5x.Versions()
-	sen5x.ProductName()
-	sen5x.SerialNumber()
-	sen5x.Status()
+	if err := sen5x.Reset(); err != nil {
+		log.ErrorLog.Printf("Failed to reset device: %q", err)
+		return
+	}
+	if err := sen5x.Versions(); err != nil {
+		log.ErrorLog.Printf("Failed to retrieve device versions: %q", err)
+		return
+	}
+	if err := sen5x.ProductName(); err != nil {
+		log.ErrorLog.Printf("Failed to retrieve product name: %q", err)
+		return
+	}
+	if err := sen5x.SerialNumber(); err != nil {
+		log.ErrorLog.Printf("Failed to retrieve serial number: %q", err)
+		return
+	}
+	if err := sen5x.SerialNumber(); err != nil {
+		log.ErrorLog.Printf("Failed to retrieve serial number: %q", err)
+		return
+	}
+	if err := sen5x.Status(); err != nil {
+		log.ErrorLog.Printf("Failed to retrieve status: %q", err)
+		return
+	}
 	log.InfoLog.Printf(`Sensirion SEN5x
 			\n\tProductName: %s
 			\n\tStatus: %d
