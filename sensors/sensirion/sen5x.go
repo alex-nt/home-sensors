@@ -16,7 +16,7 @@ var (
 	SEN5X_RESET         = Command{code: 0xD304, description: "Reset device", delay: time.Duration(0.2 * float64(time.Second)), size: 2}
 	SEN5X_SERIAL_NUMBER = Command{code: 0xD033, description: "Serial number", delay: time.Duration(0.5 * float64(time.Second)), size: 32}
 	SEN5X_PRODUCT_NAME  = Command{code: 0xD014, description: "Product name", delay: time.Duration(0.5 * float64(time.Second)), size: 32}
-	SEN5X_VERSION       = Command{code: 0xD100, description: "Versions", delay: time.Duration(0.2 * float64(time.Second)), size: 8}
+	SEN5X_VERSION       = Command{code: 0xD100, description: "Versions", delay: time.Duration(0.2 * float64(time.Second)), size: 12}
 	SEN5X_READ_STATUS   = Command{code: 0xD206, description: "Read status", delay: time.Duration(0.2 * float64(time.Second)), size: 4}
 )
 
