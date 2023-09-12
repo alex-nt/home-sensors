@@ -61,10 +61,10 @@ func (sen5x *SEN5X) Initialize(bus i2c.Bus, addr uint16) {
 		log.ErrorLog.Printf("Failed to reset device: %q", err)
 		return
 	}
-	// if err := sen5x.Versions(); err != nil {
-	// 	log.ErrorLog.Printf("Failed to retrieve device versions: %q", err)
-	// 	return
-	// }
+	if err := sen5x.Versions(); err != nil {
+		log.ErrorLog.Printf("Failed to retrieve device versions: %q", err)
+		return
+	}
 	if err := sen5x.ProductName(); err != nil {
 		log.ErrorLog.Printf("Failed to retrieve product name: %q", err)
 		return
@@ -126,10 +126,6 @@ func (sen5x *SEN5X) ProductName() error {
 }
 
 func (sen5x *SEN5X) Versions() error {
-	err := SEN5X_VERSION.Write(sen5x.device, &sen5x.mu)
-	if err != nil {
-		return fmt.Errorf("failed to write versions command: %q", err)
-	}
 	data, err := SEN5X_VERSION.Read(sen5x.device, &sen5x.mu)
 	if err != nil {
 		return fmt.Errorf("failed to read versions number: %q", err)
