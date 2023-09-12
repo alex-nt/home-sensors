@@ -61,10 +61,10 @@ func (sen5x *SEN5X) Initialize(bus i2c.Bus, addr uint16) {
 		log.ErrorLog.Printf("Failed to reset device: %q", err)
 		return
 	}
-	if err := sen5x.Versions(); err != nil {
-		log.ErrorLog.Printf("Failed to retrieve device versions: %q", err)
-		return
-	}
+	// if err := sen5x.Versions(); err != nil {
+	// 	log.ErrorLog.Printf("Failed to retrieve device versions: %q", err)
+	// 	return
+	// }
 	if err := sen5x.ProductName(); err != nil {
 		log.ErrorLog.Printf("Failed to retrieve product name: %q", err)
 		return
