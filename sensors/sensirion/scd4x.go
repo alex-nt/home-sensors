@@ -15,29 +15,31 @@ import (
 )
 
 var (
-	SCD4XX_REINIT                          = Command{code: 0x3646, description: "Reinit", delay: time.Duration(0.02 * float64(time.Second)), size: 3}
+	SCD4XX_REINIT                          = Command{code: 0x3646, description: "Reinit", delay: time.Duration(0.02 * float64(time.Second)), size: 2}
 	SCD4X_FACTORYRESET                     = Command{code: 0x3632, description: "Factory reset", delay: time.Duration(1.2 * float64(time.Second)), size: 0}
-	SCD4X_FORCEDRECAL                      = Command{code: 0x362F, description: "Force recal", delay: time.Duration(0.5 * float64(time.Second)), size: 3}
-	SCD4X_SELFTEST                         = Command{code: 0x3639, description: "Self test", delay: time.Duration(10 * float64(time.Second)), size: 3}
-	SCD4X_DATAREADY                        = Command{code: 0xE4B8, description: "Data Ready", delay: time.Duration(0.001 * float64(time.Second)), size: 3}
+	SCD4X_FORCEDRECAL                      = Command{code: 0x362F, description: "Force recal", delay: time.Duration(0.5 * float64(time.Second)), size: 2}
+	SCD4X_SELFTEST                         = Command{code: 0x3639, description: "Self test", delay: time.Duration(10 * float64(time.Second)), size: 2}
+	SCD4X_DATAREADY                        = Command{code: 0xE4B8, description: "Data Ready", delay: time.Duration(0.001 * float64(time.Second)), size: 2}
 	SCD4X_STOPPERIODICMEASUREMENT          = Command{code: 0x3F86, description: "Stop periodic measurement", delay: time.Duration(0.5 * float64(time.Second)), size: 0}
 	SCD4X_STARTPERIODICMEASUREMENT         = Command{code: 0x21B1, description: "Start periodic measurement", delay: time.Duration(0 * float64(time.Second)), size: 0}
 	SCD4X_STARTLOWPOWERPERIODICMEASUREMENT = Command{code: 0x21AC, description: "Start low power periodic measurement", delay: time.Duration(0 * float64(time.Second)), size: 0}
-	SCD4X_READMEASUREMENT                  = Command{code: 0xEC05, description: "Read measurement", delay: time.Duration(0.001 * float64(time.Second)), size: 9}
-	SCD4X_SERIALNUMBER                     = Command{code: 0x3682, description: "Serial number", delay: time.Duration(0.001 * float64(time.Second)), size: 9}
-	SCD4X_GETTEMPOFFSET                    = Command{code: 0x2318, description: "Get temp offset", delay: time.Duration(0.001 * float64(time.Second)), size: 3}
+	SCD4X_READMEASUREMENT                  = Command{code: 0xEC05, description: "Read measurement", delay: time.Duration(0.001 * float64(time.Second)), size: 6}
+	SCD4X_SERIALNUMBER                     = Command{code: 0x3682, description: "Serial number", delay: time.Duration(0.001 * float64(time.Second)), size: 6}
+	SCD4X_GETTEMPOFFSET                    = Command{code: 0x2318, description: "Get temp offset", delay: time.Duration(0.001 * float64(time.Second)), size: 2}
 	SCD4X_SETTEMPOFFSET                    = Command{code: 0x241D, description: "Set temp offset", delay: time.Duration(0 * float64(time.Second)), size: 0}
-	SCD4X_GETALTITUDE                      = Command{code: 0x2322, description: "Get altitude", delay: time.Duration(0.001 * float64(time.Second)), size: 3}
+	SCD4X_GETALTITUDE                      = Command{code: 0x2322, description: "Get altitude", delay: time.Duration(0.001 * float64(time.Second)), size: 2}
 	SCD4X_SETALTITUDE                      = Command{code: 0x2427, description: "Set altitude", delay: time.Duration(0 * float64(time.Second)), size: 0}
 	SCD4X_SETPRESSURE                      = Command{code: 0xE000, description: "Set pressure", delay: time.Duration(0 * float64(time.Second)), size: 0}
 	SCD4X_PERSISTSETTINGS                  = Command{code: 0x3615, description: "Persist settings", delay: time.Duration(0.8 * float64(time.Second)), size: 0}
-	SCD4X_GETASCE                          = Command{code: 0x2313, description: "Get asce", delay: time.Duration(0.001 * float64(time.Second)), size: 3}
+	SCD4X_GETASCE                          = Command{code: 0x2313, description: "Get asce", delay: time.Duration(0.001 * float64(time.Second)), size: 2}
 	SCD4X_SETASCE                          = Command{code: 0x2416, description: "Set asce", delay: time.Duration(0 * float64(time.Second)), size: 0}
 )
 
 type SCD4X struct {
 	device *i2c.Dev
 	mu     sync.Mutex
+
+	serialNumber string
 
 	Temperature      float64
 	RelativeHumidity float64
@@ -50,6 +52,7 @@ func init() {
 
 func (scd4x *SCD4X) Initialize(bus i2c.Bus, addr uint16) {
 	scd4x.device = &i2c.Dev{Addr: addr, Bus: bus}
+	scd4x.SerialNumber()
 	scd4x.StartPeriodicMeasurement()
 }
 
@@ -93,8 +96,8 @@ func (scd4x *SCD4X) dataReady() bool {
 func (scd4x *SCD4X) readData() error {
 	response, err := SCD4X_READMEASUREMENT.Read(scd4x.device, &scd4x.mu)
 	scd4x.CO2 = binary.BigEndian.Uint16(response[0:2])
-	scd4x.Temperature = (-45 + 175*(float64(binary.BigEndian.Uint16(response[3:5]))/math.Pow(2, 16)))
-	scd4x.RelativeHumidity = 100 * (float64(binary.BigEndian.Uint16(response[6:8])) / math.Pow(2, 16))
+	scd4x.Temperature = (-45 + 175*(float64(binary.BigEndian.Uint16(response[2:4]))/math.Pow(2, 16)))
+	scd4x.RelativeHumidity = 100 * (float64(binary.BigEndian.Uint16(response[4:6])) / math.Pow(2, 16))
 	return err
 }
 
@@ -183,19 +186,14 @@ func (scd4x *SCD4X) Test() error {
 	return nil
 }
 
-func (scd4x *SCD4X) SerialNumber() ([]uint8, error) {
-	serialNumber := make([]uint8, 6)
+func (scd4x *SCD4X) SerialNumber() error {
 	response, err := SCD4X_SERIALNUMBER.Read(scd4x.device, &scd4x.mu)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	serialNumber[0] = response[0]
-	serialNumber[1] = response[1]
-	serialNumber[2] = response[3]
-	serialNumber[3] = response[4]
-	serialNumber[4] = response[6]
-	serialNumber[5] = response[7]
-	return serialNumber, nil
+
+	scd4x.serialNumber = string(response)
+	return nil
 }
 
 func (scd4x *SCD4X) StartLowPeriodicMeasurement() {

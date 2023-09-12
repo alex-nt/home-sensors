@@ -63,8 +63,10 @@ func (cmd *Command) Read(device *i2c.Dev, mu *sync.Mutex) ([]byte, error) {
 	mu.Lock()
 	defer mu.Unlock()
 
+	actualSize := (cmd.size / 2) * 3
+
 	c := make([]byte, 2)
-	r := make([]byte, cmd.size)
+	r := make([]byte, actualSize)
 	binary.BigEndian.PutUint16(c, cmd.code)
 	if err := device.Tx(c, r); err != nil {
 		return nil, fmt.Errorf("error while %s: %q", cmd.description, err)
@@ -74,10 +76,19 @@ func (cmd *Command) Read(device *i2c.Dev, mu *sync.Mutex) ([]byte, error) {
 		return nil, err
 	}
 
+	response := make([]byte, cmd.size)
+	idx := 0
+	for i, b := range r {
+		if (i+1)%3 != 0 {
+			response[idx] = b
+			idx++
+		}
+	}
+
 	if cmd.delay > 0 {
 		time.Sleep(cmd.delay)
 	}
-	return r, nil
+	return response, nil
 }
 
 func (cmd *Command) WriteUint16(device *i2c.Dev, mu *sync.Mutex, value uint16) error {
