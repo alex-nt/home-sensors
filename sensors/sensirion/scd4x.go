@@ -53,6 +53,9 @@ func init() {
 func (scd4x *SCD4X) Initialize(bus i2c.Bus, addr uint16) {
 	scd4x.device = &i2c.Dev{Addr: addr, Bus: bus}
 	scd4x.SerialNumber()
+	log.InfoLog.Printf(`Sensirion SCD4X
+	SerialNumber: %s`,
+		scd4x.serialNumber)
 	scd4x.StartPeriodicMeasurement()
 }
 
