@@ -83,13 +83,14 @@ func (sen5x *SEN5X) Initialize(bus i2c.Bus, addr uint16) {
 	}
 	log.InfoLog.Printf(`Sensirion SEN5x
 	ProductName: %s
+	SerialNumber: %s
 	Status: %d
 	FirmwareDebug: %t
 	Versions:
 		Firmware: %d.%d
 		Hardware: %d.%d
 		Protocol: %d.%d`,
-		sen5x.productName, sen5x.status, sen5x.firmwareDebug,
+		sen5x.productName, sen5x.serialNumber, sen5x.status, sen5x.firmwareDebug,
 		sen5x.firmwareMajorVersion, sen5x.firmwareMinorVersion,
 		sen5x.hardwareMajorVersion, sen5x.hardwareMinorVersion,
 		sen5x.protocolMajorVersion, sen5x.protocolMinorVersion)
