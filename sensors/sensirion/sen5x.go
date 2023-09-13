@@ -82,8 +82,8 @@ func (sen5x *SEN5X) Collect() []sensors.MeasurementRecording {
 	sen5x.data.PM2_5 = float64(binary.BigEndian.Uint16(data[2:4])) / 10
 	sen5x.data.PM4_0 = float64(binary.BigEndian.Uint16(data[4:6])) / 10
 	sen5x.data.PM10 = float64(binary.BigEndian.Uint16(data[6:8])) / 10
-	sen5x.data.Humidity = float64(int16(binary.BigEndian.Uint16(data[8:10]))) / 200
-	sen5x.data.Temperature = float64(int16(binary.BigEndian.Uint16(data[10:12]))) / 100
+	sen5x.data.Humidity = float64(int16(binary.BigEndian.Uint16(data[8:10]))) / 100
+	sen5x.data.Temperature = float64(int16(binary.BigEndian.Uint16(data[10:12]))) / 200
 	sen5x.data.VOCIndex = float64(int16(binary.BigEndian.Uint16(data[12:14]))) / 10
 	sen5x.data.NOxIndex = float64(int16(binary.BigEndian.Uint16(data[14:16]))) / 10
 
