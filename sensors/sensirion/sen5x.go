@@ -156,6 +156,7 @@ func (sen5x *SEN5X) Initialize(bus i2c.Bus, addr uint16) {
 		log.ErrorLog.Printf("Failed to retrieve status: %q", err)
 		return
 	}
+
 	log.InfoLog.Printf(`Sensirion SEN5x
 	ProductName: %s
 	SerialNumber: %s

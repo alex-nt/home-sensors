@@ -78,9 +78,12 @@ func (scd4x *SCD4X) Initialize(bus i2c.Bus, addr uint16) {
 	if err := scd4x.SerialNumber(); err != nil {
 		log.ErrorLog.Printf("Failed to read SN: %q", err)
 	}
-	log.InfoLog.Printf(`Sensirion SCD4X
-	SerialNumber: %s`, scd4x.deviceInfo.serialNumber)
-	scd4x.StartPeriodicMeasurement()
+
+	log.InfoLog.Printf("Sensirion SCD4x\n\tSerialNumber: %s", scd4x.deviceInfo.serialNumber)
+
+	if err := SCD4X_STARTPERIODICMEASUREMENT.Write(scd4x.device, &scd4x.mu); err != nil {
+		log.ErrorLog.Printf("Failed to start periodic measurement: %q", err)
+	}
 }
 
 func (scd4x *SCD4X) Name() string {
@@ -130,10 +133,6 @@ func (scd4x *SCD4X) readData() error {
 	scd4x.data.Temperature = (-45 + 175*(float64(binary.BigEndian.Uint16(response[2:4]))/math.Pow(2, 16)))
 	scd4x.data.Humidity = 100 * (float64(binary.BigEndian.Uint16(response[4:6])) / math.Pow(2, 16))
 	return err
-}
-
-func (scd4x *SCD4X) StartPeriodicMeasurement() {
-	SCD4X_STARTPERIODICMEASUREMENT.Write(scd4x.device, &scd4x.mu)
 }
 
 func (scd4x *SCD4X) FactoryReset() {
