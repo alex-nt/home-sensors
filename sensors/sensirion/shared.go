@@ -159,3 +159,20 @@ func (cmd *Command) ReadUint16(device *i2c.Dev, mu *sync.Mutex, value uint16) ([
 	}
 	return r, nil
 }
+
+func bytesToString(data []byte) string {
+	size := len(data)
+	for i, b := range data {
+		if b == 0 {
+			size = i
+			break
+		}
+	}
+	return string(data[:size])
+}
+
+func valueBigEndianEncode(value uint16, array []byte, stardIdx int) int {
+	binary.BigEndian.PutUint16(array[stardIdx:stardIdx+2], value)
+	array[stardIdx+2] = crc8(array[stardIdx : stardIdx+2])
+	return stardIdx + 3
+}

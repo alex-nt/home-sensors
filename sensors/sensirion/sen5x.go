@@ -20,6 +20,7 @@ var (
 	SEN5X_READ_STATUS       = Command{code: 0xD206, description: "Read status", delay: time.Duration(20 * time.Millisecond), size: 4}
 	SEN5X_START_MEASUREMENT = Command{code: 0x0021, description: "Start measurement", delay: time.Duration(50 * time.Millisecond), size: 0}
 	SEN5X_READ_MEASUREMENTS = Command{code: 0x03C4, description: "Read measurements", delay: time.Duration(20 * time.Millisecond), size: 16}
+	SEN5X_RW_TEMP_OFFSET    = Command{code: 0x60B2, description: "Read/Write Temperature compensation", delay: time.Duration(20 * time.Millisecond), size: 16}
 )
 
 type SEN5XDeviceInfo struct {
@@ -151,10 +152,6 @@ func (sen5x *SEN5X) Initialize(bus i2c.Bus, addr uint16) {
 		log.ErrorLog.Printf("Failed to retrieve serial number: %q", err)
 		return
 	}
-	if err := sen5x.SerialNumber(); err != nil {
-		log.ErrorLog.Printf("Failed to retrieve serial number: %q", err)
-		return
-	}
 	if err := sen5x.Status(); err != nil {
 		log.ErrorLog.Printf("Failed to retrieve status: %q", err)
 		return
@@ -180,6 +177,26 @@ func (sen5x *SEN5X) Initialize(bus i2c.Bus, addr uint16) {
 	}
 }
 
+func (sen5x *SEN5X) SetTemperatureOffset(offset float32) error {
+	var slope int16 = 0
+	var defaultTimeConstant uint16 = 0
+	var tempOffsetTicks int16 = int16(offset * 200)
+
+	buffer := make([]uint8, 11)
+	binary.BigEndian.PutUint16(buffer[0:2], SEN5X_RW_TEMP_OFFSET.code)
+
+	idx := 2
+	idx = valueBigEndianEncode(uint16(tempOffsetTicks), buffer, idx)
+	idx = valueBigEndianEncode(uint16(slope), buffer, idx)
+	valueBigEndianEncode(uint16(defaultTimeConstant), buffer, idx)
+
+	_, err := sen5x.device.Write(buffer)
+	if err != nil {
+		return fmt.Errorf("unable to write temperature offset: %q", err)
+	}
+	return nil
+}
+
 func (sen5x *SEN5X) Reset() error {
 	return SEN5X_RESET.Write(sen5x.device, &sen5x.mu)
 }
@@ -193,7 +210,7 @@ func (sen5x *SEN5X) SerialNumber() error {
 	if err != nil {
 		return fmt.Errorf("failed to read serial number: %q", err)
 	}
-	sen5x.deviceInfo.serialNumber = string(data)
+	sen5x.deviceInfo.serialNumber = bytesToString(data)
 	return nil
 }
 
@@ -206,7 +223,7 @@ func (sen5x *SEN5X) ProductName() error {
 	if err != nil {
 		return fmt.Errorf("failed to read product name number: %q", err)
 	}
-	sen5x.deviceInfo.productName = string(data)
+	sen5x.deviceInfo.productName = bytesToString(data)
 	return nil
 }
 
