@@ -94,7 +94,7 @@ func (pe *SqliteExporter) Export(recordings []sensors.MeasurementRecording) {
 			log.ErrorLog.Fatal(err)
 		}
 		for k, v := range recording.Metadata {
-			_, err = stmtMeasurement.Exec(k, v, insertId)
+			_, err = stmtMetadata.Exec(k, v, insertId)
 			if err != nil {
 				log.ErrorLog.Fatal(err)
 			}
