@@ -36,15 +36,22 @@ var (
 	SCD4X_WAKEUP                           = Command{code: 0x36f6, description: "Wake up", delay: time.Duration(30 * time.Millisecond), size: 0}
 )
 
+type SCD4XMeasurement struct {
+	Humidity    float64
+	Temperature float64
+	CO2         float64
+}
+
+type SCD4XDeviceInfo struct {
+	serialNumber string
+}
+
 type SCD4X struct {
 	device *i2c.Dev
 	mu     sync.Mutex
 
-	serialNumber string
-
-	Temperature      float64
-	RelativeHumidity float64
-	CO2              uint16
+	deviceInfo SCD4XDeviceInfo
+	data       SCD4XMeasurement
 }
 
 func init() {
@@ -69,7 +76,7 @@ func (scd4x *SCD4X) Initialize(bus i2c.Bus, addr uint16) {
 		log.ErrorLog.Printf("Failed to read SN: %q", err)
 	}
 	log.InfoLog.Printf(`Sensirion SCD4X
-	SerialNumber: %s`, scd4x.serialNumber)
+	SerialNumber: %s`, scd4x.deviceInfo.serialNumber)
 	scd4x.StartPeriodicMeasurement()
 }
 
@@ -82,20 +89,24 @@ func (scd4x *SCD4X) Family(name string) bool {
 }
 
 func (scd4x *SCD4X) Collect() []sensors.MeasurementRecording {
+	if scd4x.dataReady() {
+		scd4x.readData()
+	}
+
 	measurements := make([]sensors.MeasurementRecording, 0)
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure: &sensors.Temperature,
-		Value:   scd4x.GetTemperature(),
+		Value:   scd4x.data.Temperature,
 		Sensor:  scd4x.Name(),
 	})
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure: &sensors.Humidity,
-		Value:   scd4x.GetRelativeHumidity(),
+		Value:   scd4x.data.Humidity,
 		Sensor:  scd4x.Name(),
 	})
 	measurements = append(measurements, sensors.MeasurementRecording{
 		Measure: &sensors.CarbonDioxide,
-		Value:   float64(scd4x.GetCO2()),
+		Value:   scd4x.data.CO2,
 		Sensor:  scd4x.Name(),
 	})
 	return measurements
@@ -112,31 +123,10 @@ func (scd4x *SCD4X) dataReady() bool {
 
 func (scd4x *SCD4X) readData() error {
 	response, err := SCD4X_READMEASUREMENT.Read(scd4x.device, &scd4x.mu)
-	scd4x.CO2 = binary.BigEndian.Uint16(response[0:2])
-	scd4x.Temperature = (-45 + 175*(float64(binary.BigEndian.Uint16(response[2:4]))/math.Pow(2, 16)))
-	scd4x.RelativeHumidity = 100 * (float64(binary.BigEndian.Uint16(response[4:6])) / math.Pow(2, 16))
+	scd4x.data.CO2 = float64(binary.BigEndian.Uint16(response[0:2]))
+	scd4x.data.Temperature = (-45 + 175*(float64(binary.BigEndian.Uint16(response[2:4]))/math.Pow(2, 16)))
+	scd4x.data.Humidity = 100 * (float64(binary.BigEndian.Uint16(response[4:6])) / math.Pow(2, 16))
 	return err
-}
-
-func (scd4x *SCD4X) GetCO2() uint16 {
-	if scd4x.dataReady() {
-		scd4x.readData()
-	}
-	return scd4x.CO2
-}
-
-func (scd4x *SCD4X) GetTemperature() float64 {
-	if scd4x.dataReady() {
-		scd4x.readData()
-	}
-	return scd4x.Temperature
-}
-
-func (scd4x *SCD4X) GetRelativeHumidity() float64 {
-	if scd4x.dataReady() {
-		scd4x.readData()
-	}
-	return scd4x.RelativeHumidity
 }
 
 func (scd4x *SCD4X) StartPeriodicMeasurement() {
@@ -200,7 +190,7 @@ func (scd4x *SCD4X) SerialNumber() error {
 		return err
 	}
 
-	scd4x.serialNumber = bytesToString(response)
+	scd4x.deviceInfo.serialNumber = bytesToString(response)
 	return nil
 }
 
