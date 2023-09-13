@@ -69,7 +69,7 @@ func (cmd *Command) Read(device *i2c.Dev, mu *sync.Mutex) ([]byte, error) {
 	r := make([]byte, actualSize)
 	binary.BigEndian.PutUint16(c, cmd.code)
 	if err := device.Tx(c, nil); err != nil {
-		return nil, fmt.Errorf("error while %s: %q", cmd.description, err)
+		return nil, fmt.Errorf("error while sending request %s: %q", cmd.description, err)
 	}
 
 	if cmd.delay > 0 {
@@ -77,7 +77,7 @@ func (cmd *Command) Read(device *i2c.Dev, mu *sync.Mutex) ([]byte, error) {
 	}
 
 	if err := device.Tx(nil, r); err != nil {
-		return nil, fmt.Errorf("error while %s: %q", cmd.description, err)
+		return nil, fmt.Errorf("error while reading request %s: %q", cmd.description, err)
 	}
 
 	if err := checkBufferCRC(r); err != nil {
