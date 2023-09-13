@@ -68,7 +68,15 @@ func (cmd *Command) Read(device *i2c.Dev, mu *sync.Mutex) ([]byte, error) {
 	c := make([]byte, 2)
 	r := make([]byte, actualSize)
 	binary.BigEndian.PutUint16(c, cmd.code)
-	if err := device.Tx(c, r); err != nil {
+	if err := device.Tx(c, nil); err != nil {
+		return nil, fmt.Errorf("error while %s: %q", cmd.description, err)
+	}
+
+	if cmd.delay > 0 {
+		time.Sleep(cmd.delay)
+	}
+
+	if err := device.Tx(nil, r); err != nil {
 		return nil, fmt.Errorf("error while %s: %q", cmd.description, err)
 	}
 
@@ -85,9 +93,6 @@ func (cmd *Command) Read(device *i2c.Dev, mu *sync.Mutex) ([]byte, error) {
 		}
 	}
 
-	if cmd.delay > 0 {
-		time.Sleep(cmd.delay)
-	}
 	return response, nil
 }
 
