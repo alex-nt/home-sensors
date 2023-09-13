@@ -69,8 +69,7 @@ func (scd4x *SCD4X) Initialize(bus i2c.Bus, addr uint16) {
 		log.ErrorLog.Printf("Failed to read SN: %q", err)
 	}
 	log.InfoLog.Printf(`Sensirion SCD4X
-	SerialNumber: %s`,
-		scd4x.serialNumber)
+	SerialNumber: %s`, scd4x.serialNumber)
 	scd4x.StartPeriodicMeasurement()
 }
 
@@ -201,7 +200,7 @@ func (scd4x *SCD4X) SerialNumber() error {
 		return err
 	}
 
-	scd4x.serialNumber = string(response)
+	scd4x.serialNumber = bytesToString(response)
 	return nil
 }
 
