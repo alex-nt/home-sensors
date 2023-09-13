@@ -33,6 +33,7 @@ var (
 	SCD4X_PERSISTSETTINGS                  = Command{code: 0x3615, description: "Persist settings", delay: time.Duration(800 * time.Millisecond), size: 0}
 	SCD4X_GETASCE                          = Command{code: 0x2313, description: "Get asce", delay: time.Duration(1 * time.Millisecond), size: 2}
 	SCD4X_SETASCE                          = Command{code: 0x2416, description: "Set asce", delay: time.Duration(1 * time.Millisecond), size: 0}
+	SCD4X_WAKEUP                           = Command{code: 0x36f6, description: "Wake up", delay: time.Duration(30 * time.Millisecond), size: 0}
 )
 
 type SCD4X struct {
@@ -52,6 +53,18 @@ func init() {
 
 func (scd4x *SCD4X) Initialize(bus i2c.Bus, addr uint16) {
 	scd4x.device = &i2c.Dev{Addr: addr, Bus: bus}
+	if err := SCD4X_WAKEUP.Write(scd4x.device, &scd4x.mu); err != nil {
+		log.ErrorLog.Printf("Failed to wakeup: %q", err)
+		return
+	}
+	if err := SCD4X_STOPPERIODICMEASUREMENT.Write(scd4x.device, &scd4x.mu); err != nil {
+		log.ErrorLog.Printf("Failed to stop measurements: %q", err)
+		return
+	}
+	if err := SCD4XX_REINIT.Write(scd4x.device, &scd4x.mu); err != nil {
+		log.ErrorLog.Printf("Failed to reinit device: %q", err)
+		return
+	}
 	if err := scd4x.SerialNumber(); err != nil {
 		log.ErrorLog.Printf("Failed to read SN: %q", err)
 	}
@@ -127,21 +140,12 @@ func (scd4x *SCD4X) GetRelativeHumidity() float64 {
 	return scd4x.RelativeHumidity
 }
 
-func (scd4x *SCD4X) StopPeriodicMeasurement() {
-	SCD4X_STOPPERIODICMEASUREMENT.Write(scd4x.device, &scd4x.mu)
-}
-
 func (scd4x *SCD4X) StartPeriodicMeasurement() {
 	SCD4X_STARTPERIODICMEASUREMENT.Write(scd4x.device, &scd4x.mu)
 }
 
-func (scd4x *SCD4X) reinit() {
-	scd4x.StopPeriodicMeasurement()
-	SCD4XX_REINIT.Write(scd4x.device, &scd4x.mu)
-}
-
 func (scd4x *SCD4X) FactoryReset() {
-	scd4x.StopPeriodicMeasurement()
+	SCD4X_STOPPERIODICMEASUREMENT.Write(scd4x.device, &scd4x.mu)
 	SCD4X_FACTORYRESET.Write(scd4x.device, &scd4x.mu)
 }
 
