@@ -60,6 +60,9 @@ func init() {
 
 func (scd4x *SCD4X) Initialize(bus i2c.Bus, addr uint16) {
 	scd4x.device = &i2c.Dev{Addr: addr, Bus: bus}
+	if err := SCD4X_STOPPERIODICMEASUREMENT.Write(scd4x.device, &scd4x.mu); err != nil {
+		log.ErrorLog.Printf("Failed to stop measurements: %q", err)
+	}
 	if err := SCD4X_WAKEUP.Write(scd4x.device, &scd4x.mu); err != nil {
 		log.ErrorLog.Printf("Failed to wakeup: %q", err)
 		return
