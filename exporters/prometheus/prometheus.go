@@ -13,43 +13,51 @@ import (
 
 var (
 	pmStandardGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_air_quality_pm_concentration_standard",
-		Help: "Air quality. PM concentration in standard units",
+		Name: sensors.ParticleMatterStandard.ID,
+		Help: sensors.ParticleMatterStandard.Description,
 	}, []string{string(sensors.ParticleConcentration), string(sensors.SensorName)})
 	pmEnvGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_air_quality_pm_concentration_env",
-		Help: "Air quality. PM concentration in environmental units",
+		Name: sensors.ParticleMatterEnvironmental.ID,
+		Help: sensors.ParticleMatterEnvironmental.Description,
 	}, []string{string(sensors.ParticleConcentration), string(sensors.SensorName)})
 	particlesCountGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_air_quality_particles_count",
-		Help: "Air quality. Particulate matter per 0.1L air.",
+		Name: sensors.ParticleCount.ID,
+		Help: sensors.ParticleCount.Description,
 	}, []string{string(sensors.ParticleSize), string(sensors.SensorName)})
 )
 
 var (
 	temperatureGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_temperature",
-		Help: "Ambient temperature in C",
+		Name: sensors.Temperature.ID,
+		Help: sensors.Temperature.Description,
 	}, []string{string(sensors.SensorName)})
 	humidityGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_humidity",
-		Help: "Ambient relative humidity",
+		Name: sensors.Humidity.ID,
+		Help: sensors.Humidity.Description,
 	}, []string{string(sensors.SensorName)})
 	co2Gauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_co2",
-		Help: "CO2 in ppm",
+		Name: sensors.CarbonDioxide.ID,
+		Help: sensors.CarbonDioxide.Description,
+	}, []string{string(sensors.SensorName)})
+	vocGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: sensors.VOC.ID,
+		Help: sensors.VOC.Description,
+	}, []string{string(sensors.SensorName)})
+	noxGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: sensors.NOx.ID,
+		Help: sensors.NOx.Description,
 	}, []string{string(sensors.SensorName)})
 	pressureGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_pressure",
-		Help: "Pressure Hpa",
+		Name: sensors.Pressure.ID,
+		Help: sensors.Pressure.Description,
 	}, []string{string(sensors.SensorName)})
 	gasResistanceGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_gasResistance",
-		Help: "Gas resistance in Ohm",
+		Name: sensors.GasResistance.ID,
+		Help: sensors.GasResistance.Description,
 	}, []string{string(sensors.SensorName)})
 	iaqGauge = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "room_iaq",
-		Help: "Indoor Air Quality",
+		Name: sensors.AIQ.ID,
+		Help: sensors.AIQ.Description,
 	}, []string{string(sensors.SensorName)})
 )
 
@@ -63,6 +71,8 @@ var measurementToGauge = map[sensors.Measurement]*prometheus.GaugeVec{
 	sensors.ParticleCount:               particlesCountGauge,
 	sensors.ParticleMatterEnvironmental: pmEnvGauge,
 	sensors.ParticleMatterStandard:      pmStandardGauge,
+	sensors.NOx:                         noxGauge,
+	sensors.VOC:                         vocGauge,
 }
 
 type PrometheusExporter struct {

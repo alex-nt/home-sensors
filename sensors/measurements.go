@@ -12,6 +12,8 @@ const (
 	Count                   Unit = "Count"                   // Number of instances
 	Micrometre              Unit = "Micrometre"              // um
 	MicrogramsPerCubicMetre Unit = "MicrogramsPerCubicMetre" // µg/m³
+	VOCIndex                Unit = "VOC Index"               // Range 1 - 500
+	NOxIndex                Unit = "NOx Index"               // Range 1 - 500
 )
 
 type Metadata string
@@ -43,6 +45,16 @@ var (
 		ID:          "room_humidity",
 		Description: "Ambient relative humidity",
 		Unit:        Percentage,
+	}
+	VOC = Measurement{
+		ID:          "room_voc",
+		Description: "Volatile organic compounds",
+		Unit:        VOCIndex,
+	}
+	NOx = Measurement{
+		ID:          "room_nox",
+		Description: "Nitric Oxide",
+		Unit:        NOxIndex,
 	}
 	CarbonDioxide = Measurement{
 		ID:          "room_co2",
