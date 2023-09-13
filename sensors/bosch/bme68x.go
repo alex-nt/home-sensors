@@ -1,10 +1,12 @@
-package sensors
+package bosch
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"azuremyst.org/go-home-sensors/log"
+	"azuremyst.org/go-home-sensors/sensors"
 	"periph.io/x/conn/v3/i2c"
 )
 
@@ -293,11 +295,56 @@ type BME68XHeaterConf struct {
 	heatr_dur  uint16 // Store the heating duration for forced mode in milliseconds
 }
 
-func NewBME68X(device *i2c.Dev) BME68X {
-	return BME68X{device: device}
+func init() {
+	sensors.RegisterSensor(&BME68X{})
 }
 
-func (bme68x *BME68X) Init() {
+func (bme68x *BME68X) Initialize(bus i2c.Bus, addr uint16) {
+	bme68x.device = &i2c.Dev{Addr: addr, Bus: bus}
+	bme68x.init()
+}
+
+// TODO: Reconsider this, we should detect the proper version depending on the chipId
+func (bme68x *BME68X) Name() string {
+	return "bme68x"
+}
+
+func (bme68x *BME68X) Family(name string) bool {
+	return len(name) == 6 && strings.HasPrefix(strings.ToLower(name), "bme68")
+}
+
+func (bme68x *BME68X) Collect() []sensors.MeasurementRecording {
+	bme68x.getSensorData()
+	measurements := make([]sensors.MeasurementRecording, 0)
+	measurements = append(measurements, sensors.MeasurementRecording{
+		Measure: &sensors.Temperature,
+		Value:   float64(bme68x.Data.Temperature),
+		Sensor:  bme68x.Name(),
+	})
+	measurements = append(measurements, sensors.MeasurementRecording{
+		Measure: &sensors.Pressure,
+		Value:   float64(bme68x.Data.Pressure),
+		Sensor:  bme68x.Name(),
+	})
+	measurements = append(measurements, sensors.MeasurementRecording{
+		Measure: &sensors.Humidity,
+		Value:   float64(bme68x.Data.Humidity),
+		Sensor:  bme68x.Name(),
+	})
+	measurements = append(measurements, sensors.MeasurementRecording{
+		Measure: &sensors.GasResistance,
+		Value:   float64(bme68x.Data.GasResistance),
+		Sensor:  bme68x.Name(),
+	})
+	measurements = append(measurements, sensors.MeasurementRecording{
+		Measure: &sensors.AIQ,
+		Value:   float64(bme68x.Data.IAQ),
+		Sensor:  bme68x.Name(),
+	})
+	return measurements
+}
+
+func (bme68x *BME68X) init() {
 	if err := bme68x.softReset(); err != nil {
 		log.ErrorLog.Printf("could not reset device; %v/n", err)
 		return
@@ -570,7 +617,7 @@ func (bme68x *BME68X) getPowerMode() error {
 	return nil
 }
 
-func (bme68x *BME68X) GetSensorData() {
+func (bme68x *BME68X) getSensorData() {
 	if err := bme68x.setPowerMode(BME68X_FORCED_MODE); err != nil {
 		log.ErrorLog.Printf("Could not toggle to forced mode; %v\n", err)
 		return
