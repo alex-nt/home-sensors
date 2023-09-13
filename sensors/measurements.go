@@ -28,6 +28,7 @@ type Measurement struct {
 	ID          string
 	Description string
 	Unit        Unit
+	Labels      []string
 }
 
 var (
@@ -35,60 +36,71 @@ var (
 		ID:          "room_pressure",
 		Description: "Pressure hPa",
 		Unit:        Hectopascal,
+		Labels:      []string{string(SensorName)},
 	}
 	Temperature = Measurement{
 		ID:          "room_temperature",
 		Description: "Ambient temperature in C",
 		Unit:        Celsius,
+		Labels:      []string{string(SensorName)},
 	}
 	Humidity = Measurement{
 		ID:          "room_humidity",
 		Description: "Ambient relative humidity",
 		Unit:        Percentage,
+		Labels:      []string{string(SensorName)},
 	}
 	VOC = Measurement{
 		ID:          "room_voc",
 		Description: "Volatile organic compounds",
 		Unit:        VOCIndex,
+		Labels:      []string{string(SensorName)},
 	}
 	NOx = Measurement{
 		ID:          "room_nox",
 		Description: "Nitric Oxide",
 		Unit:        NOxIndex,
+		Labels:      []string{string(SensorName)},
 	}
 	CarbonDioxide = Measurement{
 		ID:          "room_co2",
 		Description: "CO2 in ppm",
 		Unit:        PartsPerMillion,
+		Labels:      []string{string(SensorName)},
 	}
 	AIQ = Measurement{
 		ID:          "room_iaq",
 		Description: "Indoor Air Quality",
 		Unit:        AirQualityIndex,
+		Labels:      []string{string(SensorName)},
 	}
 	GasResistance = Measurement{
 		ID:          "room_gasResistance",
 		Description: "Gas resistance in Ohm",
 		Unit:        Ohm,
+		Labels:      []string{string(SensorName)},
 	}
 	ParticleMatterEnvironmental = Measurement{
 		ID:          "room_air_quality_pm_concentration_env",
 		Description: "Air quality. PM concentration in environmental units.",
 		Unit:        MicrogramsPerCubicMetre,
+		Labels:      []string{string(ParticleConcentration), string(SensorName)},
 	}
 	ParticleMatterStandard = Measurement{
 		ID:          "room_air_quality_pm_concentration_standard",
 		Description: "Air quality. PM concentration in standard units.",
 		Unit:        MicrogramsPerCubicMetre,
+		Labels:      []string{string(ParticleConcentration), string(SensorName)},
 	}
 	ParticleCount = Measurement{
 		ID:          "room_air_quality_particles_count",
 		Description: "Air quality. Particulate matter per 0.1L air.",
 		Unit:        Count,
+		Labels:      []string{string(ParticleSize), string(SensorName)},
 	}
 
 	Measurements = []Measurement{Pressure, Temperature, Humidity, CarbonDioxide, AIQ, GasResistance,
-		ParticleCount, ParticleMatterEnvironmental, ParticleMatterStandard}
+		ParticleCount, ParticleMatterEnvironmental, ParticleMatterStandard, NOx, VOC}
 )
 
 type MeasurementRecording struct {
