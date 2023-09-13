@@ -167,7 +167,7 @@ func (scd4x *SCD4X) ToggleCalibration(enable bool) {
 }
 
 func (scd4x *SCD4X) ForceCalibration(targetCO2 uint16) error {
-	scd4x.StopPeriodicMeasurement()
+	SCD4X_STOPPERIODICMEASUREMENT.Write(scd4x.device, &scd4x.mu)
 	response, err := SCD4X_FORCEDRECAL.ReadUint16(scd4x.device, &scd4x.mu, targetCO2)
 	if err != nil {
 		return err
@@ -184,7 +184,7 @@ func (scd4x *SCD4X) ForceCalibration(targetCO2 uint16) error {
 }
 
 func (scd4x *SCD4X) Test() error {
-	scd4x.StopPeriodicMeasurement()
+	SCD4X_STOPPERIODICMEASUREMENT.Write(scd4x.device, &scd4x.mu)
 	response, err := SCD4X_SELFTEST.Read(scd4x.device, &scd4x.mu)
 	if err != nil {
 		return err
