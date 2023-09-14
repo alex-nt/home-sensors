@@ -247,6 +247,7 @@ func (sen5x *SEN5X) Versions() error {
 	return nil
 }
 
+// TODO: Properly implement this according to 5.4 of specs
 func (sen5x *SEN5X) Status() error {
 	err := SEN5X_READ_STATUS.Write(sen5x.device, &sen5x.mu)
 	if err != nil {

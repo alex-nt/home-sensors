@@ -1,4 +1,37 @@
-# Sensor collection
+# Sensor data collector/exporter
+
+Expose sensor data as prometheus metrics or just collect it in a sqlite db.
+
+The supported metrics can be seen in [/sensors/measurements.go](sensors/measurements.go).
+
+## Usage
+
+### Linux
+
+1. Copy and edit the [following config](config.toml) 
+2. Run `go-home-sensors ----config.file config.toml`
+
+### NixOS
+
+Just include the dependency in your flake confing and enable the service.
+
+```nix
+alex-nt.services.home-sensors = {
+    enable = true;
+    settings = {
+        sensors = {
+            bme68x.enable = true;
+            scd4x.enable = true;
+            sen5x.enable = true;
+            pmsa003i.enable = true;
+        };
+        exporters = {
+            prometheus.enable = true;
+            sqlite.enable = true;
+        };
+    };
+};
+```
 
 ### Supported sensors
 

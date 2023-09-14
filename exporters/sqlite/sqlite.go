@@ -37,32 +37,32 @@ func CreateExporter(path string) exporters.Exporter {
 
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
-		log.ErrorLog.Fatalf("Unable to open file %q\n", err)
+		log.ErrorLog.Fatalf("Unable to open file %q", err)
 	}
 
 	_, err = db.Exec(tableSQL)
 	if err != nil {
-		log.ErrorLog.Fatalf("Failed to create tables %q: %s\n", err, tableSQL)
+		log.ErrorLog.Fatalf("Failed to create tables %q: %s", err, tableSQL)
 	}
 
 	tx, err := db.Begin()
 	if err != nil {
-		log.ErrorLog.Fatal(err)
+		log.ErrorLog.Fatalf("Failed to start transaction: %q", err)
 	}
 	stmt, err := tx.Prepare("INSERT OR REPLACE INTO measurement(id, description, unit) VALUES(?, ?, ?)")
 	if err != nil {
-		log.ErrorLog.Fatal(err)
+		log.ErrorLog.Fatalf("Failed create measurement statement: %q", err)
 	}
 	defer stmt.Close()
 	for _, m := range sensors.Measurements {
 		_, err = stmt.Exec(m.ID, m.Description, m.Unit)
 		if err != nil {
-			log.ErrorLog.Fatal(err)
+			log.ErrorLog.Fatalf("Failed to insert measurements: %q", err)
 		}
 	}
-	err = tx.Commit()
-	if err != nil {
-		log.ErrorLog.Fatal(err)
+
+	if err = tx.Commit(); err != nil {
+		log.ErrorLog.Fatalf("Failed to commit db initialization: %q", err)
 	}
 	return &SqliteExporter{db: db}
 }
@@ -70,16 +70,18 @@ func CreateExporter(path string) exporters.Exporter {
 func (pe *SqliteExporter) Export(recordings []sensors.MeasurementRecording) {
 	tx, err := pe.db.Begin()
 	if err != nil {
-		log.ErrorLog.Fatal(err)
+		log.ErrorLog.Fatalf("Failed to start export transaction: %q", err)
 	}
+
 	stmtMeasurement, err := tx.Prepare("INSERT INTO measurement_recording(value, measure_id) VALUES(?, ?)")
 	if err != nil {
-		log.ErrorLog.Fatal(err)
+		log.ErrorLog.Fatalf("Failed create measurement_recording statement: %q", err)
 	}
 	defer stmtMeasurement.Close()
+
 	stmtMetadata, err := tx.Prepare("INSERT INTO measurement_meta_data(key, value, recording_id) VALUES(?, ?, ?)")
 	if err != nil {
-		log.ErrorLog.Fatal(err)
+		log.ErrorLog.Fatalf("Failed create measurement_meta_data statement: %q", err)
 	}
 	defer stmtMetadata.Close()
 
@@ -91,18 +93,16 @@ func (pe *SqliteExporter) Export(recordings []sensors.MeasurementRecording) {
 
 		insertId, err := res.LastInsertId()
 		if err != nil {
-			log.ErrorLog.Fatal(err)
+			log.ErrorLog.Fatalf("Failed to retrieve last insert id: %q", err)
 		}
 		for k, v := range recording.Metadata {
-			_, err = stmtMetadata.Exec(k, v, insertId)
-			if err != nil {
-				log.ErrorLog.Fatal(err)
+			if _, err = stmtMetadata.Exec(k, v, insertId); err != nil {
+				log.ErrorLog.Fatalf("Failed to insert metadata asociated with recording: %q", err)
 			}
 		}
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		log.ErrorLog.Println(err)
+	if err = tx.Commit(); err != nil {
+		log.ErrorLog.Fatalf("Failed to commit metric export: %q", err)
 	}
 }
