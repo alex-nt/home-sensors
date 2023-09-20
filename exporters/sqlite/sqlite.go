@@ -41,7 +41,8 @@ func createDBFile(path string) error {
 }
 
 func CreateExporter(path string) exporters.Exporter {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
+	dbPath := path
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		if err := createDBFile(path); err != nil {
 			log.ErrorLog.Fatalf("Unable to create db file %q", err)
 		}
@@ -51,13 +52,13 @@ func CreateExporter(path string) exporters.Exporter {
 		ext := filepath.Ext(file)
 		fileName := strings.TrimSuffix(file, ext)
 
-		newPath := filepath.Join(dir, fileName+"_"+strconv.FormatInt(time.Now().UnixMilli(), 10)+"_"+uuid.NewString()+ext)
-		if err := createDBFile(newPath); err != nil {
+		dbPath = filepath.Join(dir, fileName+"_"+strconv.FormatInt(time.Now().UnixMilli(), 10)+"_"+uuid.NewString()+ext)
+		if err := createDBFile(dbPath); err != nil {
 			log.ErrorLog.Fatalf("Unable to create new db file %q", err)
 		}
 	}
 
-	db, err := sql.Open("sqlite3", path)
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		log.ErrorLog.Fatalf("Unable to open file %q", err)
 	}
