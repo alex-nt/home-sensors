@@ -51,7 +51,7 @@ func CreateExporter(path string) exporters.Exporter {
 		ext := filepath.Ext(file)
 		fileName := strings.TrimSuffix(file, ext)
 
-		newPath := filepath.Join(dir, fileName+"_"+strconv.FormatInt(time.Now().UnixMilli(), 10)+"_"+uuid.NewString()+"."+ext)
+		newPath := filepath.Join(dir, fileName+"_"+strconv.FormatInt(time.Now().UnixMilli(), 10)+"_"+uuid.NewString()+ext)
 		if err := createDBFile(newPath); err != nil {
 			log.ErrorLog.Fatalf("Unable to create new db file %q", err)
 		}
