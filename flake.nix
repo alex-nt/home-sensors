@@ -2,7 +2,7 @@
   description = "Env sensor prometheus collector";
 
   # Nixpkgs / NixOS version to use.
-  inputs.nixpkgs.url = "nixpkgs/nixos-23.05";
+  inputs.nixpkgs.url = "nixpkgs/nixos-23.11";
 
   outputs = { self, nixpkgs }:
     let
@@ -56,7 +56,7 @@
             # remeber to bump this hash when your dependencies change.
             #vendorSha256 = pkgs.lib.fakeSha256;
 
-            vendorSha256 = "sha256-fSOV+xPugDwNOu+WHOdaOwUbo8YHbIE9jCutotaZkJY=";
+            vendorHash = "sha256-nUJ+fPe9Etqnjj7KnEhXjtAr3m1Vsjac9AQfNSXjTAE=";
           };
         });
 

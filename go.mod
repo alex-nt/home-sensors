@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/BurntSushi/toml v1.3.2
+	github.com/google/uuid v1.3.1
 	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/prometheus/client_golang v1.16.0
 	periph.io/x/conn/v3 v3.7.0

@@ -3,11 +3,17 @@ package sqlite
 import (
 	"database/sql"
 	_ "embed"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
+
+	"github.com/google/uuid"
 
 	"azuremyst.org/go-home-sensors/exporters"
 	"azuremyst.org/go-home-sensors/log"
@@ -21,21 +27,38 @@ type SqliteExporter struct {
 	db *sql.DB
 }
 
-func CreateExporter(path string) exporters.Exporter {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		err := os.MkdirAll(filepath.Dir(path), fs.FileMode(os.O_RDWR))
-		if err != nil {
-			log.ErrorLog.Fatalf("Failed to create path to db file: %q", err)
-		}
-
-		file, err := os.Create(path)
-		if err != nil {
-			log.ErrorLog.Fatalf("Failed to create database file: %q", err)
-		}
-		file.Close()
+func createDBFile(path string) error {
+	err := os.MkdirAll(filepath.Dir(path), fs.FileMode(os.O_RDWR))
+	if err != nil {
+		return fmt.Errorf("failed to create path to db file: %q", err)
 	}
 
-	db, err := sql.Open("sqlite3", path)
+	file, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("failed to create database file: %q", err)
+	}
+	return file.Close()
+}
+
+func CreateExporter(path string) exporters.Exporter {
+	dbPath := path
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		if err := createDBFile(path); err != nil {
+			log.ErrorLog.Fatalf("Unable to create db file %q", err)
+		}
+	} else {
+		dir := filepath.Dir(path)
+		file := filepath.Base(path)
+		ext := filepath.Ext(file)
+		fileName := strings.TrimSuffix(file, ext)
+
+		dbPath = filepath.Join(dir, fileName+"_"+strconv.FormatInt(time.Now().UnixMilli(), 10)+"_"+uuid.NewString()+ext)
+		if err := createDBFile(dbPath); err != nil {
+			log.ErrorLog.Fatalf("Unable to create new db file %q", err)
+		}
+	}
+
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		log.ErrorLog.Fatalf("Unable to open file %q", err)
 	}
