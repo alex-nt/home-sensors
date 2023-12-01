@@ -55,6 +55,7 @@ func initializeExporters(conf Config) []exporters.Exporter {
 
 type (
 	Config struct {
+		Bus       string
 		Sensors   map[string]SensorConfig
 		Exporters MetricExporters
 		Port      int
@@ -98,7 +99,7 @@ func main() {
 	}
 
 	// Use i2creg I²C bus registry to find the first available I²C bus.
-	b, err := i2creg.Open("")
+	b, err := i2creg.Open(conf.Bus)
 	if err != nil {
 		log.ErrorLog.Fatal(err)
 	}

@@ -72,6 +72,13 @@
             options.alex-nt.services.home-sensors = {
               enable = mkEnableOption "Enables the home-sensors exporter service";
               settings = {
+                bus = lib.mkOption {
+                  type = types.str;
+                  default = "1";
+                  description = ''
+                    i2c bus to be used
+                  '';
+                };
                 port = lib.mkOption {
                   type = lib.types.port;
                   default = 2112;
